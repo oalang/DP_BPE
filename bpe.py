@@ -12,12 +12,30 @@ class Word:
         for i in range(len(self.subwords) - 1):
             self.bigrams.append((self.subwords[i], self.subwords[i + 1]))
 
+    def apply_model(self, model):
+        subwords = self.subwords
+        bigrams = self.bigrams
+        for pair in model.operations:
+            if pair in bigrams:
+                i = 0
+                while i < len(subwords) - 1:
+                    if (subwords[i], subwords[i + 1]) == pair:
+                        subwords[i] = pair[0] + pair[1]
+                        subwords.pop(i + 1)
+                    i += 1
+                bigrams.clear()
+                for i in range(len(subwords) - 1):
+                    bigrams.append((subwords[i], subwords[i + 1]))
+
     def update_count(self, n):
         self.freq += n
         assert self.freq >= 0, "Frequency of '%s' is %d, which is less than 0" % (self.word, self.freq)
 
+    def show(self):
+        return self.word + " " + str(self.freq)
+
     def print(self):
-        print(self.word + " " + str(self.freq))
+        print(self.show())
 
 
 class Bigram:
@@ -42,45 +60,65 @@ class Vocabulary:
         self.sbwd_set = set()
 
     @classmethod
-    def from_file(cls, file):
+    def from_text(cls, file):
         new_vocab = cls()
         for line in file:
             line = line.upper()
             line = re.sub(r"[^A-Z']", ' ', line)
             for word in line.split():
-                new_vocab.add_word(word)
+                if new_vocab.missing(word):
+                    new_vocab.add_word(word)
                 new_vocab.dict[word].update_count(1)
         new_vocab.sort()
-        new_vocab.sbwd_set = set(new_vocab.char_set)
         return new_vocab
 
-    def add_word(self, word):
-        if word not in self.dict:
-            new_word = Word(word)
-            self.dict[word] = new_word
-            self.list.append(new_word)
-            self.char_set.update(new_word.subwords)
+    @classmethod
+    def from_vocab(cls, file):
+        new_vocab = cls()
+        for line in file:
+            line = line.upper()
+            entry = line.split()
+            word = entry[0]
+            frequency = int(entry[1])
+            new_vocab.add_word(word)
+            new_vocab.dict[word].update_count(frequency)
+        new_vocab.sort()
+        return new_vocab
+
+    def add_word(self, word, model=None):
+        assert word not in self.dict, "'%s' already in vocabulary" % word
+        new_word = Word(word)
+        self.dict[word] = new_word
+        self.list.append(new_word)
+        self.char_set.update(new_word.subwords)
+        if model is not None:
+            new_word.apply_model(model)
+        self.sbwd_set.update(new_word.subwords)
 
     def sort(self):
         s = sorted(self.list, key=lambda word: word.word)
         self.list = sorted(s, key=lambda word: word.freq, reverse=True)
         self.sorted = True
 
-    def print(self, max_print=None):
+    def print(self, file=None, max_print=None):
         i = 0
         for word in self.list:
-            word.print()
+            if file is None:
+                word.print()
+            else:
+                file.write(word.show() + "\n")
             i += 1
             if max_print is not None and i >= max_print:
                 break
 
-    def apply(self, pair):
+    def apply_operation(self, pair):
         updates = collections.defaultdict(int)
         for word in self.list:
-            if pair in word.bigrams:
+            subwords = word.subwords
+            bigrams = word.bigrams
+            freq = word.freq
+            if pair in bigrams:
                 self.sbwd_set.update({pair[0] + pair[1]})
-                freq = word.freq
-                subwords = word.subwords
                 i = 0
                 while i < len(subwords) - 1:
                     if (subwords[i], subwords[i + 1]) == pair:
@@ -94,11 +132,20 @@ class Vocabulary:
                             updates[(pair[1], subwords[i + 1])] -= freq
                             updates[(subwords[i], subwords[i + 1])] += freq
                     i += 1
-                bigrams = word.bigrams
                 bigrams.clear()
                 for i in range(len(subwords) - 1):
                     bigrams.append((subwords[i], subwords[i + 1]))
         return updates
+
+    def missing(self, word):
+        if word in self.dict:
+            return False
+        else:
+            return True
+
+    def map(self, word):
+        subwords = self.dict[word].subwords
+        return ' '.join(subwords)
 
 
 class Statistics:
@@ -154,17 +201,28 @@ class Statistics:
         self.sorted = False
 
 
-class BPEModel:
+class Model:
     def __init__(self):
         self.operations = []
+
+    @classmethod
+    def from_file(cls, file):
+        new_model = cls()
+        for line in file:
+            entry = line.split()
+            new_model.add((entry[0], entry[1]))
+        return new_model
 
     def add(self, pair):
         self.operations.append(pair)
 
-    def print(self, max_print=None):
+    def print(self, file=None, max_print=None):
         i = 0
         for operation in self.operations:
-            print(operation)
+            if file is None:
+                print(operation)
+            else:
+                file.write(operation[0] + " " + operation[1] + "\n")
             i += 1
             if max_print is not None and i >= max_print:
                 break
@@ -172,19 +230,19 @@ class BPEModel:
 
 def main():
     file = open(sys.argv[1])
-    vocab = Vocabulary.from_file(file)
+    vocab = Vocabulary.from_text(file)
     stats = Statistics.from_vocab(vocab)
-    model = BPEModel()
-    vocab.print(10)
-    stats.print(10)
+    model = Model()
+    vocab.print(max_print=10)
+    stats.print(max_print=10)
     for i in range(1000):
         best = stats.max_pair()
         if best is None:
             break
         model.add(best)
-        updates = vocab.apply(best)
+        updates = vocab.apply_operation(best)
         stats.update(updates)
-    model.print(10)
+    model.print(max_print=10)
 
     file.close()
 
