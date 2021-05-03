@@ -54,10 +54,10 @@ def apply_model(args):
     vocab = Vocabulary()
     for line in text_file:
         mappings = []
-        for word in line.split():
-            if vocab.missing(word):
-                vocab.add_word(word, model=model)
-            mappings.append(vocab.map(word))
+        for token in line.split():
+            if vocab.missing(token):
+                vocab.add_word(token, model=model)
+            mappings.append(vocab.map_to_sbwds(token))
         subwrd_file.write(' '.join(mappings) + "\n")
     text_file.close()
     subwrd_file.close()

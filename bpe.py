@@ -4,58 +4,54 @@ import sys
 
 
 class Word:
-    def __init__(self, word):
-        self.word = word
+    def __init__(self, token):
+        self.token = token
         self.freq = 0
-        self.subwords = list(word) + ["_"]
-        self.bigrams = []
-        for i in range(len(self.subwords) - 1):
-            self.bigrams.append((self.subwords[i], self.subwords[i + 1]))
+        self.subwords = list(token) + ["_"]
 
     def apply_model(self, model):
         subwords = self.subwords
-        bigrams = self.bigrams
-        for pair in model.operations:
-            if pair in bigrams:
-                i = 0
-                while i < len(subwords) - 1:
-                    if (subwords[i], subwords[i + 1]) == pair:
-                        subwords[i] = pair[0] + pair[1]
-                        subwords.pop(i + 1)
-                    i += 1
-                bigrams.clear()
-                for i in range(len(subwords) - 1):
-                    bigrams.append((subwords[i], subwords[i + 1]))
+        operations = model.operations
+        for pair in operations:
+            a, b = pair
+            i = 0
+            while i < len(subwords) - 1:
+                if subwords[i] == a and subwords[i + 1] == b:
+                    subword = a + b
+                    subwords[i] = subword
+                    subwords.pop(i + 1)
+                i += 1
 
     def update_count(self, n):
         self.freq += n
-        assert self.freq >= 0, "Frequency of '%s' is %d, which is less than 0" % (self.word, self.freq)
+        assert self.freq >= 0, f"Frequency of {self.token} is {self.freq}, which is less than 0"
 
     def show(self):
-        return self.word + " " + str(self.freq)
+        return self.token + " " + str(self.freq)
 
     def print(self):
         print(self.show())
 
 
 class Bigram:
-    def __init__(self, a, b):
-        self.pair = (a, b)
+    def __init__(self, pair):
+        self.pair = pair
         self.freq = 0
 
     def update_count(self, n):
         self.freq += n
-        assert self.freq >= 0, "Frequency of %s is %d, which is less than 0" % (str(self.pair), self.freq)
+        assert self.freq >= 0, f"Frequency of {str(self.pair)} is {self.freq}, which is less than 0"
+
+    def show(self):
+        return str(self.pair) + " " + str(self.freq)
 
     def print(self):
-        print(str(self.pair) + " " + str(self.freq))
+        print(str(self.show()))
 
 
 class Vocabulary:
     def __init__(self):
-        self.dict = {}
-        self.list = []
-        self.sorted = False
+        self.tokn_dict = {}
         self.char_set = set()
         self.sbwd_set = set()
 
@@ -65,11 +61,10 @@ class Vocabulary:
         for line in file:
             line = line.upper()
             line = re.sub(r"[^A-Z']", ' ', line)
-            for word in line.split():
-                if new_vocab.missing(word):
-                    new_vocab.add_word(word)
-                new_vocab.dict[word].update_count(1)
-        new_vocab.sort()
+            for token in line.split():
+                if new_vocab.missing(token):
+                    new_vocab.add_word(token)
+                new_vocab.tokn_dict[token].update_count(1)
         return new_vocab
 
     @classmethod
@@ -78,31 +73,62 @@ class Vocabulary:
         for line in file:
             line = line.upper()
             entry = line.split()
-            word = entry[0]
-            frequency = int(entry[1])
-            new_vocab.add_word(word)
-            new_vocab.dict[word].update_count(frequency)
-        new_vocab.sort()
+            token = entry[0]
+            freq = int(entry[1])
+            new_vocab.add_word(token)
+            new_vocab.tokn_dict[token].update_count(freq)
         return new_vocab
 
-    def add_word(self, word, model=None):
-        assert word not in self.dict, "'%s' already in vocabulary" % word
-        new_word = Word(word)
-        self.dict[word] = new_word
-        self.list.append(new_word)
+    def missing(self, token):
+        if token in self.tokn_dict:
+            return False
+        else:
+            return True
+
+    def add_word(self, token, model=None):
+        assert token not in self.tokn_dict, f"'{token}' already in token dictionary"
+        new_word = Word(token)
+        self.tokn_dict[token] = new_word
         self.char_set.update(new_word.subwords)
         if model is not None:
             new_word.apply_model(model)
         self.sbwd_set.update(new_word.subwords)
 
-    def sort(self):
-        s = sorted(self.list, key=lambda word: word.word)
-        self.list = sorted(s, key=lambda word: word.freq, reverse=True)
-        self.sorted = True
+    def apply_operation(self, pair):
+        a, b = pair
+        updates = collections.defaultdict(int)
+        for word in self.tokn_dict.values():
+            subwords = word.subwords
+            freq = word.freq
+            i = 0
+            while i < len(subwords) - 1:
+                if subwords[i] == a and subwords[i + 1] == b:
+                    subword = a + b
+                    subwords[i] = subword
+                    subwords.pop(i + 1)
+                    updates[(a, b)] -= freq
+                    if i > 0:
+                        updates[(subwords[i - 1], a)] -= freq
+                        updates[(subwords[i - 1], subwords[i])] += freq
+                    if i < len(subwords) - 1:
+                        updates[(b, subwords[i + 1])] -= freq
+                        updates[(subwords[i], subwords[i + 1])] += freq
+                    self.sbwd_set.update({subword})
+                i += 1
+        return updates
+
+    def map_to_sbwds(self, token):
+        subwords = self.tokn_dict[token].subwords
+        return ' '.join(subwords)
+
+    def sorted(self):
+        words = sorted(self.tokn_dict.values(), key=lambda word: word.token)
+        words = sorted(words, key=lambda word: word.freq, reverse=True)
+        return words
 
     def print(self, file=None, max_print=None):
         i = 0
-        for word in self.list:
+        for word in self.sorted():
             if file is None:
                 word.print()
             else:
@@ -111,94 +137,65 @@ class Vocabulary:
             if max_print is not None and i >= max_print:
                 break
 
-    def apply_operation(self, pair):
-        updates = collections.defaultdict(int)
-        for word in self.list:
-            subwords = word.subwords
-            bigrams = word.bigrams
-            freq = word.freq
-            if pair in bigrams:
-                self.sbwd_set.update({pair[0] + pair[1]})
-                i = 0
-                while i < len(subwords) - 1:
-                    if (subwords[i], subwords[i + 1]) == pair:
-                        subwords[i] = pair[0] + pair[1]
-                        subwords.pop(i + 1)
-                        updates[pair] -= freq
-                        if i > 0:
-                            updates[(subwords[i - 1], pair[0])] -= freq
-                            updates[(subwords[i - 1], subwords[i])] += freq
-                        if i < len(subwords) - 1:
-                            updates[(pair[1], subwords[i + 1])] -= freq
-                            updates[(subwords[i], subwords[i + 1])] += freq
-                    i += 1
-                bigrams.clear()
-                for i in range(len(subwords) - 1):
-                    bigrams.append((subwords[i], subwords[i + 1]))
-        return updates
-
-    def missing(self, word):
-        if word in self.dict:
-            return False
-        else:
-            return True
-
-    def map(self, word):
-        subwords = self.dict[word].subwords
-        return ' '.join(subwords)
-
 
 class Statistics:
     def __init__(self):
-        self.dict = {}
-        self.list = []
-        self.sorted = False
+        self.bgrm_dict = {}
 
     @classmethod
     def from_vocab(cls, vocab):
         new_stats = cls()
-        for word in vocab.dict:
-            bigrams = vocab.dict[word].bigrams
-            freq = vocab.dict[word].freq
-            for pair in bigrams:
-                new_stats.add_pair(pair)
-                new_stats.dict[pair].update_count(freq)
-        new_stats.sort()
+        for token in vocab.tokn_dict:
+            subwords = vocab.tokn_dict[token].subwords
+            freq = vocab.tokn_dict[token].freq
+            for i in range(len(subwords)-1):
+                pair = (subwords[i], subwords[i + 1])
+                if new_stats.missing(pair):
+                    new_stats.add_bigram(pair)
+                new_stats.bgrm_dict[pair].update_count(freq)
         return new_stats
 
-    def add_pair(self, pair):
-        if pair not in self.dict:
-            new_pair = Bigram(pair[0], pair[1])
-            self.dict[pair] = new_pair
-            self.list.append(new_pair)
-            self.sorted = False
+    def missing(self, pair):
+        if pair in self.bgrm_dict:
+            return False
+        else:
+            return True
 
-    def sort(self):
-        s = sorted(self.list, key=lambda pair: pair.pair)
-        self.list = sorted(s, key=lambda pair: pair.freq, reverse=True)
-        self.sorted = True
+    def add_bigram(self, pair):
+        assert pair not in self.bgrm_dict, f"{str(pair)} already in bigram dictionary"
+        new_bigram = Bigram(pair)
+        self.bgrm_dict[pair] = new_bigram
 
     def max_pair(self):
-        if not self.sorted:
-            self.sort()
-        if self.list and self.list[0].freq > 0:
-            return self.list[0].pair
-        else:
+        max_bigram = max(self.bgrm_dict.values(), key=lambda bigram: bigram.freq, default=None)
+        if max_bigram is None:
             return None
-
-    def print(self, max_print=None):
-        i = 0
-        for pair in self.list:
-            pair.print()
-            i += 1
-            if max_print is not None and i >= max_print:
-                break
+        else:
+            return max_bigram.pair
 
     def update(self, updates):
         for pair in updates:
-            self.add_pair(pair)
-            self.dict[pair].update_count(updates[pair])
-        self.sorted = False
+            if self.missing(pair):
+                self.add_bigram(pair)
+            self.bgrm_dict[pair].update_count(updates[pair])
+            if self.bgrm_dict[pair] == 0:
+                del self.bgrm_dict[pair]
+
+    def sorted(self):
+        bigrams = sorted(self.bgrm_dict.values(), key=lambda bigram: bigram.pair)
+        bigrams = sorted(bigrams, key=lambda bigram: bigram.freq, reverse=True)
+        return bigrams
+
+    def print(self, file=None, max_print=None):
+        i = 0
+        for bigram in self.sorted():
+            if file is None:
+                bigram.print()
+            else:
+                file.write(bigram.show() + "\n")
+            i += 1
+            if max_print is not None and i >= max_print:
+                break
 
 
 class Model:
