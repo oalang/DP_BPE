@@ -7,7 +7,7 @@ class Word:
     def __init__(self, word):
         self.word = word
         self.freq = 0
-        self.subwords = ["_"] + list(word)
+        self.subwords = list(word) + ["_"]
         self.bigrams = []
         for i in range(len(self.subwords) - 1):
             self.bigrams.append((self.subwords[i], self.subwords[i + 1]))
