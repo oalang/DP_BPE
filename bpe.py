@@ -54,9 +54,7 @@ class Bigram:
 class Vocabulary:
     def __init__(self):
         self.tokn_dict = {}
-        # Character set and subword set tracking is not currently needed, but maybe later
-        # self.char_set = set()
-        # self.sbwd_set = set()
+        self.char_set = set()
 
     @classmethod
     def from_text(cls, file):
@@ -92,10 +90,12 @@ class Vocabulary:
         assert token not in self.tokn_dict, f"'{token}' already in token dictionary"
         new_word = Word(token)
         self.tokn_dict[token] = new_word
-        # self.char_set.update(new_word.subwords)
+        self.char_set.update(new_word.subwords)
         if model is not None:
             new_word.apply_model(model)
-        # self.sbwd_set.update(new_word.subwords)
+
+    def num_char(self):
+        return len(self.char_set)
 
     def apply_operation(self, pair):
         a, b = pair
@@ -115,7 +115,6 @@ class Vocabulary:
                     if i < len(subwords) - 1:
                         updates[(b, subwords[i + 1])] -= freq
                         updates[(subwords[i], subwords[i + 1])] += freq
-                    # self.sbwd_set.update({subword})
                 i += 1
         return updates
 
