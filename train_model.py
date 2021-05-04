@@ -27,7 +27,7 @@ class Arguments:
         parser.add_argument("--output",
                             help="file path for model output",
                             type=str)
-        parser.add_argument("--max_operations",
+        parser.add_argument("--max-operations",
                             help="maximum number of operations to learn",
                             type=int,
                             default=1000)
@@ -49,24 +49,22 @@ def train_model(args):
     model_fname = args.model_fname
     max_operations = args.max_operations
 
-    vocab_file = open(vocab_fname, 'r')
-    vocab = Vocabulary.from_vocab(vocab_file)
-    vocab_file.close()
+    with open(vocab_fname, 'r') as vocab_file:
+        vocab = Vocabulary.from_vocab(vocab_file)
 
     stats = Statistics.from_vocab(vocab)
     model = Model()
     for i in range(max_operations):
-        best_pair = stats.max_pair()
-        if best_pair is None:
+        max_pair = stats.max_pair()
+        if max_pair is None:
             print(f"Stopped early with {i} operations")
             break
-        model.add_operation(best_pair)
-        updates = vocab.apply_operation(best_pair)
+        model.add_operation(max_pair)
+        updates = vocab.apply_operation(max_pair)
         stats.update(updates)
 
-    model_file = open(model_fname, 'w')
-    model.print(file=model_file)
-    model_file.close()
+    with open(model_fname, 'w') as model_file:
+        model.print(file=model_file)
 
 
 def main():

@@ -45,22 +45,18 @@ def apply_model(args):
     text_fname = args.text_fname
     subwrd_fname = args.subwrd_fname
 
-    model_file = open(model_fname, 'r')
-    model = Model.from_file(model_file)
-    model_file.close()
+    with open(model_fname, 'r') as model_file:
+        model = Model.from_file(model_file)
 
-    text_file = open(text_fname, 'r')
-    subwrd_file = open(subwrd_fname, 'w')
-    vocab = Vocabulary()
-    for line in text_file:
-        mappings = []
-        for token in line.split():
-            if vocab.missing(token):
-                vocab.add_word(token, model=model)
-            mappings.append(vocab.map_to_sbwds(token))
-        subwrd_file.write(' '.join(mappings) + "\n")
-    text_file.close()
-    subwrd_file.close()
+    with open(text_fname, 'r') as text_file, open(subwrd_fname, 'w') as subwrd_file:
+        vocab = Vocabulary()
+        for line in text_file:
+            mappings = []
+            for token in line.split():
+                if vocab.missing(token):
+                    vocab.add_word(token, model=model)
+                mappings.append(vocab.map_to_sbwds(token))
+            subwrd_file.write(' '.join(mappings) + "\n")
 
 
 def main():

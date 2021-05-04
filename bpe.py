@@ -1,4 +1,8 @@
-import collections
+"""
+Classes and methods for generating a vocabulary, training a BPE model, and applying it to text
+"""
+
+from collections import defaultdict
 import re
 
 
@@ -95,7 +99,7 @@ class Vocabulary:
 
     def apply_operation(self, pair):
         a, b = pair
-        updates = collections.defaultdict(int)
+        updates = defaultdict(int)
         for word in self.tokn_dict.values():
             subwords = word.subwords
             freq = word.freq

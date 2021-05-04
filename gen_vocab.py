@@ -41,13 +41,11 @@ def gen_vocab(args):
     text_fname = args.text_fname
     vocab_fname = args.vocab_fname
 
-    text_file = open(text_fname, 'r')
-    vocab = Vocabulary.from_text(text_file)
-    text_file.close()
+    with open(text_fname, 'r') as text_file:
+        vocab = Vocabulary.from_text(text_file)
 
-    vocab_file = open(vocab_fname, 'w')
-    vocab.print(file=vocab_file)
-    vocab_file.close()
+    with open(vocab_fname, 'w') as vocab_file:
+        vocab.print(file=vocab_file)
 
 
 def main():
