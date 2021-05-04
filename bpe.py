@@ -1,6 +1,5 @@
 import collections
 import re
-import sys
 
 
 class Word:
@@ -8,6 +7,16 @@ class Word:
         self.token = token
         self.freq = 0
         self.subwords = list(token) + ["_"]
+
+    def update_freq(self, n):
+        self.freq += n
+        assert self.freq >= 0, f"Frequency of '{self.token}' is {self.freq}, which is less than 0"
+
+    def show(self):
+        return f"{self.token} {self.freq}"
+
+    def print(self):
+        print(self.show())
 
     def apply_model(self, model):
         subwords = self.subwords
@@ -17,20 +26,9 @@ class Word:
             i = 0
             while i < len(subwords) - 1:
                 if subwords[i] == a and subwords[i + 1] == b:
-                    subword = a + b
-                    subwords[i] = subword
-                    subwords.pop(i + 1)
+                    subwords[i] = a + b
+                    del subwords[i + 1]
                 i += 1
-
-    def update_count(self, n):
-        self.freq += n
-        assert self.freq >= 0, f"Frequency of {self.token} is {self.freq}, which is less than 0"
-
-    def show(self):
-        return self.token + " " + str(self.freq)
-
-    def print(self):
-        print(self.show())
 
 
 class Bigram:
@@ -38,12 +36,12 @@ class Bigram:
         self.pair = pair
         self.freq = 0
 
-    def update_count(self, n):
+    def update_freq(self, n):
         self.freq += n
-        assert self.freq >= 0, f"Frequency of {str(self.pair)} is {self.freq}, which is less than 0"
+        assert self.freq >= 0, f"Frequency of {self.pair} is {self.freq}, which is less than 0"
 
     def show(self):
-        return str(self.pair) + " " + str(self.freq)
+        return f"{self.pair} {self.freq}"
 
     def print(self):
         print(str(self.show()))
@@ -52,19 +50,20 @@ class Bigram:
 class Vocabulary:
     def __init__(self):
         self.tokn_dict = {}
-        self.char_set = set()
-        self.sbwd_set = set()
+        # Character set and subword set tracking is not currently needed, but maybe later
+        # self.char_set = set()
+        # self.sbwd_set = set()
 
     @classmethod
     def from_text(cls, file):
         new_vocab = cls()
         for line in file:
             line = line.upper()
-            line = re.sub(r"[^A-Z']", ' ', line)
+            line = re.sub(r"[^A-Z']", " ", line)
             for token in line.split():
                 if new_vocab.missing(token):
                     new_vocab.add_word(token)
-                new_vocab.tokn_dict[token].update_count(1)
+                new_vocab.tokn_dict[token].update_freq(1)
         return new_vocab
 
     @classmethod
@@ -76,7 +75,7 @@ class Vocabulary:
             token = entry[0]
             freq = int(entry[1])
             new_vocab.add_word(token)
-            new_vocab.tokn_dict[token].update_count(freq)
+            new_vocab.tokn_dict[token].update_freq(freq)
         return new_vocab
 
     def missing(self, token):
@@ -89,10 +88,10 @@ class Vocabulary:
         assert token not in self.tokn_dict, f"'{token}' already in token dictionary"
         new_word = Word(token)
         self.tokn_dict[token] = new_word
-        self.char_set.update(new_word.subwords)
+        # self.char_set.update(new_word.subwords)
         if model is not None:
             new_word.apply_model(model)
-        self.sbwd_set.update(new_word.subwords)
+        # self.sbwd_set.update(new_word.subwords)
 
     def apply_operation(self, pair):
         a, b = pair
@@ -103,9 +102,8 @@ class Vocabulary:
             i = 0
             while i < len(subwords) - 1:
                 if subwords[i] == a and subwords[i + 1] == b:
-                    subword = a + b
-                    subwords[i] = subword
-                    subwords.pop(i + 1)
+                    subwords[i] = a + b
+                    del subwords[i + 1]
                     updates[(a, b)] -= freq
                     if i > 0:
                         updates[(subwords[i - 1], a)] -= freq
@@ -113,7 +111,7 @@ class Vocabulary:
                     if i < len(subwords) - 1:
                         updates[(b, subwords[i + 1])] -= freq
                         updates[(subwords[i], subwords[i + 1])] += freq
-                    self.sbwd_set.update({subword})
+                    # self.sbwd_set.update({subword})
                 i += 1
         return updates
 
@@ -152,7 +150,7 @@ class Statistics:
                 pair = (subwords[i], subwords[i + 1])
                 if new_stats.missing(pair):
                     new_stats.add_bigram(pair)
-                new_stats.bgrm_dict[pair].update_count(freq)
+                new_stats.bgrm_dict[pair].update_freq(freq)
         return new_stats
 
     def missing(self, pair):
@@ -166,20 +164,20 @@ class Statistics:
         new_bigram = Bigram(pair)
         self.bgrm_dict[pair] = new_bigram
 
+    def update(self, updates):
+        for pair, n in updates.items():
+            if self.missing(pair):
+                self.add_bigram(pair)
+            self.bgrm_dict[pair].update_freq(n)
+            if self.bgrm_dict[pair].freq == 0:
+                del self.bgrm_dict[pair]
+
     def max_pair(self):
         max_bigram = max(self.bgrm_dict.values(), key=lambda bigram: bigram.freq, default=None)
         if max_bigram is None:
             return None
         else:
             return max_bigram.pair
-
-    def update(self, updates):
-        for pair in updates:
-            if self.missing(pair):
-                self.add_bigram(pair)
-            self.bgrm_dict[pair].update_count(updates[pair])
-            if self.bgrm_dict[pair].freq == 0:
-                del self.bgrm_dict[pair]
 
     def sorted(self):
         bigrams = sorted(self.bgrm_dict.values(), key=lambda bigram: bigram.pair)
@@ -206,11 +204,12 @@ class Model:
     def from_file(cls, file):
         new_model = cls()
         for line in file:
+            line = line.upper()
             entry = line.split()
-            new_model.add((entry[0], entry[1]))
+            new_model.add_operation((entry[0], entry[1]))
         return new_model
 
-    def add(self, pair):
+    def add_operation(self, pair):
         self.operations.append(pair)
 
     def print(self, file=None, max_print=None):
@@ -223,26 +222,3 @@ class Model:
             i += 1
             if max_print is not None and i >= max_print:
                 break
-
-
-def main():
-    file = open(sys.argv[1])
-    vocab = Vocabulary.from_text(file)
-    stats = Statistics.from_vocab(vocab)
-    model = Model()
-    vocab.print(max_print=10)
-    stats.print(max_print=10)
-    for i in range(1000):
-        best = stats.max_pair()
-        if best is None:
-            break
-        model.add(best)
-        updates = vocab.apply_operation(best)
-        stats.update(updates)
-    model.print(max_print=10)
-
-    file.close()
-
-
-if __name__ == '__main__':
-    main()

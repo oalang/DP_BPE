@@ -56,12 +56,12 @@ def train_model(args):
     stats = Statistics.from_vocab(vocab)
     model = Model()
     for i in range(max_operations):
-        best = stats.max_pair()
-        if best is None:
+        best_pair = stats.max_pair()
+        if best_pair is None:
             print(f"Stopped early with {i} operations")
             break
-        model.add(best)
-        updates = vocab.apply_operation(best)
+        model.add_operation(best_pair)
+        updates = vocab.apply_operation(best_pair)
         stats.update(updates)
 
     model_file = open(model_fname, 'w')
