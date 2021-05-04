@@ -58,6 +58,7 @@ def train_model(args):
     for i in range(max_operations):
         best = stats.max_pair()
         if best is None:
+            print(f"Stopped early with {i} operations")
             break
         model.add(best)
         updates = vocab.apply_operation(best)

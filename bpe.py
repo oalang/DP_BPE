@@ -178,7 +178,7 @@ class Statistics:
             if self.missing(pair):
                 self.add_bigram(pair)
             self.bgrm_dict[pair].update_count(updates[pair])
-            if self.bgrm_dict[pair] == 0:
+            if self.bgrm_dict[pair].freq == 0:
                 del self.bgrm_dict[pair]
 
     def sorted(self):
