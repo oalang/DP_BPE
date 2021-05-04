@@ -56,12 +56,12 @@ def train_model(args):
     stats = Statistics.from_vocab(vocab)
     model = Model()
     for i in range(max_operations):
-        max_pair = stats.max_pair()
-        if max_pair is None:
+        max_bigram = stats.max_bigram()
+        if max_bigram is None:
             print(f"Stopped early with {i} operations")
             break
-        model.add_operation(max_pair)
-        updates = vocab.apply_operation(max_pair)
+        model.add_operation(max_bigram.pair)
+        updates = vocab.replace_bigram(max_bigram)
         stats.update(updates)
 
     with open(model_fname, 'w') as model_file:

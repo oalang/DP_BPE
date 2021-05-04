@@ -97,8 +97,8 @@ class Vocabulary:
     def num_char(self):
         return len(self.char_set)
 
-    def apply_operation(self, pair):
-        a, b = pair
+    def replace_bigram(self, bigram):
+        a, b = bigram.pair
         updates = defaultdict(int)
         for word in self.tokn_dict.values():
             subwords = word.subwords
@@ -175,12 +175,12 @@ class Statistics:
             if self.bgrm_dict[pair].freq == 0:
                 del self.bgrm_dict[pair]
 
-    def max_pair(self):
+    def max_bigram(self):
         max_bigram = max(self.bgrm_dict.values(), key=lambda bigram: bigram.freq, default=None)
         if max_bigram is None:
             return None
         else:
-            return max_bigram.pair
+            return max_bigram
 
     def sorted(self):
         bigrams = sorted(self.bgrm_dict.values(), key=lambda bigram: bigram.pair)
