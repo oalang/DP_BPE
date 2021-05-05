@@ -46,7 +46,7 @@ def apply_model(args):
     subwrd_fname = args.subwrd_fname
 
     with open(model_fname, 'r') as model_file:
-        model = Model.from_file(model_file)
+        model = Model.from_model_file(model_file)
 
     with open(text_fname, 'r') as text_file, open(subwrd_fname, 'w') as subwrd_file:
         vocab = Vocabulary()

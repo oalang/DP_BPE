@@ -39,9 +39,14 @@ class Bigram:
     def __init__(self, pair):
         self.pair = pair
         self.freq = 0
+        self.token_freq = defaultdict(int)
 
-    def update_freq(self, n):
-        self.freq += n
+    def update_token_freq(self, token_updates):
+        for token, n in token_updates.items():
+            self.token_freq[token] += n
+            if not self.token_freq[token]:
+                del self.token_freq[token]
+            self.freq += n
         assert self.freq >= 0, f"Frequency of {self.pair} is {self.freq}, which is less than 0"
 
     def show(self):
@@ -57,7 +62,7 @@ class Vocabulary:
         self.char_set = set()
 
     @classmethod
-    def from_text(cls, file):
+    def from_text_file(cls, file):
         new_vocab = cls()
         for line in file:
             line = line.upper()
@@ -69,7 +74,7 @@ class Vocabulary:
         return new_vocab
 
     @classmethod
-    def from_vocab(cls, file):
+    def from_vocab_file(cls, file):
         new_vocab = cls()
         for line in file:
             line = line.upper()
@@ -99,22 +104,23 @@ class Vocabulary:
 
     def replace_bigram(self, bigram):
         a, b = bigram.pair
-        updates = defaultdict(int)
-        for word in self.tokn_dict.values():
-            subwords = word.subwords
-            freq = word.freq
+        tokens = bigram.token_freq.keys()
+        updates = defaultdict(lambda: defaultdict(int))
+        for token in tokens:
+            freq = self.tokn_dict[token].freq
+            subwords = self.tokn_dict[token].subwords
             i = 0
             while i < len(subwords) - 1:
                 if subwords[i] == a and subwords[i + 1] == b:
                     subwords[i] = a + b
                     del subwords[i + 1]
-                    updates[(a, b)] -= freq
+                    updates[(a, b)][token] -= freq
                     if i > 0:
-                        updates[(subwords[i - 1], a)] -= freq
-                        updates[(subwords[i - 1], subwords[i])] += freq
+                        updates[(subwords[i - 1], a)][token] -= freq
+                        updates[(subwords[i - 1], subwords[i])][token] += freq
                     if i < len(subwords) - 1:
-                        updates[(b, subwords[i + 1])] -= freq
-                        updates[(subwords[i], subwords[i + 1])] += freq
+                        updates[(b, subwords[i + 1])][token] -= freq
+                        updates[(subwords[i], subwords[i + 1])][token] += freq
                 i += 1
         return updates
 
@@ -153,7 +159,7 @@ class Statistics:
                 pair = (subwords[i], subwords[i + 1])
                 if new_stats.missing(pair):
                     new_stats.add_bigram(pair)
-                new_stats.bgrm_dict[pair].update_freq(freq)
+                new_stats.bgrm_dict[pair].update_token_freq({token: freq})
         return new_stats
 
     def missing(self, pair):
@@ -167,12 +173,12 @@ class Statistics:
         new_bigram = Bigram(pair)
         self.bgrm_dict[pair] = new_bigram
 
-    def update(self, updates):
-        for pair, n in updates.items():
+    def update_bigrams(self, bigram_updates):
+        for pair, token_updates in bigram_updates.items():
             if self.missing(pair):
                 self.add_bigram(pair)
-            self.bgrm_dict[pair].update_freq(n)
-            if self.bgrm_dict[pair].freq == 0:
+            self.bgrm_dict[pair].update_token_freq(token_updates)
+            if not self.bgrm_dict[pair].freq:
                 del self.bgrm_dict[pair]
 
     def max_bigram(self):
@@ -204,7 +210,7 @@ class Model:
         self.operations = []
 
     @classmethod
-    def from_file(cls, file):
+    def from_model_file(cls, file):
         new_model = cls()
         for line in file:
             line = line.upper()
