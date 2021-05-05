@@ -64,7 +64,6 @@ def train_model(args):
         updates = vocab.replace_bigram(max_bigram)
         bigram_stats.remove_bigram(max_bigram)
         bigram_stats.update_frequencies(updates)
-
     with open(model_fname, 'w') as model_file:
         bpe_model.write(file=model_file)
 

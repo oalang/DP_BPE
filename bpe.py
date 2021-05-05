@@ -3,6 +3,7 @@ Classes and methods for generating a vocabulary, training a BPE model, and apply
 """
 
 from collections import defaultdict
+from math import ceil
 import re
 
 
@@ -159,7 +160,7 @@ class Statistics:
     def __init__(self):
         self.bgrm_dict = {}
         self.search_set = set()
-        self.threshold = 1
+        self.threshold = None
         self.max_freq = 0
 
     @classmethod
@@ -177,9 +178,8 @@ class Statistics:
                 bigram.update_token_freq({token: freq})
                 if bigram.freq > new_stats.max_freq:
                     new_stats.max_freq = bigram.freq
-        for bigram in new_stats.bgrm_dict.values():
-            if bigram.freq >= new_stats.threshold:
-                bigram.add_to_search_set(new_stats.search_set)
+        new_stats.threshold = ceil(new_stats.max_freq / 2)
+        new_stats.build_search_set()
         return new_stats
 
     def missing(self, pair):
@@ -216,8 +216,31 @@ class Statistics:
             if bigram.freq == 0:
                 del self.bgrm_dict[pair]
 
+    def build_search_set(self):
+        max_bigram = None
+        for bigram in self.bgrm_dict.values():
+            if max_bigram is None or bigram.freq > max_bigram.freq:
+                max_bigram = bigram
+            if bigram.freq >= self.threshold:
+                bigram.add_to_search_set(self.search_set)
+        if not self.search_set:
+            max_bigram.add_to_search_set(self.search_set)
+            self.threshold = max_bigram.freq
+        return max_bigram
+
     def max_bigram(self):
-        return max(self.search_set, key=lambda bigram: bigram.freq, default=None)
+        max_bigram = None
+        if self.search_set:
+            if self.max_freq == self.threshold:
+                max_bigram = next(iter(self.search_set))
+            else:
+                max_bigram = max(self.search_set, key=lambda bigram: bigram.freq)
+                self.max_freq = max_bigram.freq
+        elif self.bgrm_dict:
+            self.threshold = ceil(self.threshold / 2)
+            max_bigram = self.build_search_set()
+            self.max_freq = max_bigram.freq
+        return max_bigram
 
 
 # Model object contains an ordered list of subword concatenation operations. Each operation
