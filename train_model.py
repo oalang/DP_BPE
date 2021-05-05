@@ -6,6 +6,7 @@ Trains a BPE model from a given vocabulary and saves it to an output file with t
 """
 
 import argparse
+import time
 from bpe import Vocabulary, Statistics, Model
 
 
@@ -72,7 +73,9 @@ def main():
     parser = Arguments.get_parser()
     args = Arguments(parser.parse_args())
     if args.valid():
+        start_time = time.time()
         train_model(args)
+        print(time.time()-start_time)
     else:
         print("Error: Invalid Options\n" + args.invalid_opts())
 
