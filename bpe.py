@@ -44,7 +44,7 @@ class Bigram:
         self.token_freq = defaultdict(int)
 
     def update_token_freq(self, token_updates):
-        # Update the frequency of the bigram in every token where it has changed.
+        # Update the frequency of the bigram in every token where it has changed, and also the overall frequency.
         for token, n in token_updates.items():
             self.token_freq[token] += n
             # Remove a token from the frequency dictionary if it no longer contains the bigram.
