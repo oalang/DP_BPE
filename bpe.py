@@ -42,16 +42,27 @@ class Bigram:
         self.pair = pair
         self.freq = 0
         self.token_freq = defaultdict(int)
+        self.in_search_set = False
 
     def update_token_freq(self, token_updates):
         # Update the frequency of the bigram in every token where it has changed, and also the overall frequency.
         for token, n in token_updates.items():
             self.token_freq[token] += n
             # Remove a token from the frequency dictionary if it no longer contains the bigram.
-            if not self.token_freq[token]:
+            if self.token_freq[token] == 0:
                 del self.token_freq[token]
             self.freq += n
         assert self.freq >= 0, f"Frequency of {self.pair} is {self.freq}, which is less than 0"
+
+    def add_to_search_set(self, search_set):
+        assert not self.in_search_set, f"{self.pair} already in search set"
+        search_set.add(self)
+        self.in_search_set = True
+
+    def remove_from_search_set(self, search_set):
+        assert self.in_search_set, f"{self.pair} already in search set"
+        search_set.remove(self)
+        self.in_search_set = False
 
 
 # Vocabulary object contains a dictionary of all the tokens appearing in a given text
@@ -147,18 +158,28 @@ class Vocabulary:
 class Statistics:
     def __init__(self):
         self.bgrm_dict = {}
+        self.search_set = set()
+        self.threshold = 1
+        self.max_freq = 0
 
     @classmethod
     def from_vocab(cls, vocab):
         new_stats = cls()
-        for token in vocab.tokn_dict:
-            subwords = vocab.tokn_dict[token].subwords
-            freq = vocab.tokn_dict[token].freq
+        for word in vocab.tokn_dict.values():
+            token = word.token
+            subwords = word.subwords
+            freq = word.freq
             for i in range(len(subwords)-1):
                 pair = (subwords[i], subwords[i + 1])
                 if new_stats.missing(pair):
                     new_stats.add_bigram(pair)
-                new_stats.bgrm_dict[pair].update_token_freq({token: freq})
+                bigram = new_stats.bgrm_dict[pair]
+                bigram.update_token_freq({token: freq})
+                if bigram.freq > new_stats.max_freq:
+                    new_stats.max_freq = bigram.freq
+        for bigram in new_stats.bgrm_dict.values():
+            if bigram.freq >= new_stats.threshold:
+                bigram.add_to_search_set(new_stats.search_set)
         return new_stats
 
     def missing(self, pair):
@@ -176,19 +197,27 @@ class Statistics:
         pair = bigram.pair
         assert pair in self.bgrm_dict, f"{str(pair)} not in bigram dictionary"
         del self.bgrm_dict[pair]
+        bigram.remove_from_search_set(self.search_set)
 
     def update_frequencies(self, updates):
         # For each subword pair in the updates dictionary, update its corresponding Bigram instance.
         for pair, token_updates in updates.items():
             if self.missing(pair):
                 self.add_bigram(pair)
-            self.bgrm_dict[pair].update_token_freq(token_updates)
+            bigram = self.bgrm_dict[pair]
+            bigram.update_token_freq(token_updates)
+            if bigram.freq >= self.threshold:
+                if not bigram.in_search_set:
+                    bigram.add_to_search_set(self.search_set)
+            else:
+                if bigram.in_search_set:
+                    bigram.remove_from_search_set(self.search_set)
             # Remove a pair from the bigram dictionary if it no longer appears in any subword mappings.
-            if not self.bgrm_dict[pair].freq:
+            if bigram.freq == 0:
                 del self.bgrm_dict[pair]
 
     def max_bigram(self):
-        return max(self.bgrm_dict.values(), key=lambda bigram: bigram.freq, default=None)
+        return max(self.search_set, key=lambda bigram: bigram.freq, default=None)
 
 
 # Model object contains an ordered list of subword concatenation operations. Each operation
