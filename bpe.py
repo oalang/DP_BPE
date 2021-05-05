@@ -177,9 +177,9 @@ class Statistics:
         assert pair in self.bgrm_dict, f"{str(pair)} not in bigram dictionary"
         del self.bgrm_dict[pair]
 
-    def update_bigrams(self, bigram_updates):
+    def update_frequencies(self, updates):
         # For each subword pair in the updates dictionary, update its corresponding Bigram instance.
-        for pair, token_updates in bigram_updates.items():
+        for pair, token_updates in updates.items():
             if self.missing(pair):
                 self.add_bigram(pair)
             self.bgrm_dict[pair].update_token_freq(token_updates)

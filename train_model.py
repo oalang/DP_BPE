@@ -61,9 +61,9 @@ def train_model(args):
             print(f"Stopped early with {i} operations")
             break
         bpe_model.add_operation(max_bigram)
-        bigram_updates = vocab.replace_bigram(max_bigram)
-        bigram_stats.update_bigrams(bigram_updates)
+        updates = vocab.replace_bigram(max_bigram)
         bigram_stats.remove_bigram(max_bigram)
+        bigram_stats.update_frequencies(updates)
 
     with open(model_fname, 'w') as model_file:
         bpe_model.write(file=model_file)
