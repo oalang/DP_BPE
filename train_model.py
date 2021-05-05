@@ -51,22 +51,22 @@ def train_model(args):
     max_subwords = args.max_subwords
 
     with open(vocab_fname, 'r') as vocab_file:
-        vocab = Vocabulary.from_vocab(vocab_file)
+        vocab = Vocabulary.from_vocab_file(vocab_file)
 
     max_operations = max_subwords - vocab.num_char()
-    stats = Statistics.from_vocab(vocab)
-    model = Model()
+    bigram_stats = Statistics.from_vocab(vocab)
+    bpe_model = Model()
     for i in range(max_operations):
-        max_pair = stats.max_pair()
-        if max_pair is None:
+        max_bigram = bigram_stats.max_bigram()
+        if max_bigram is None:
             print(f"Stopped early with {i} operations")
             break
-        model.add_operation(max_pair)
-        updates = vocab.apply_operation(max_pair)
-        stats.update(updates)
+        bpe_model.add_operation(max_bigram.pair)
+        bigram_updates = vocab.replace_bigram(max_bigram)
+        bigram_stats.update_bigrams(bigram_updates)
 
     with open(model_fname, 'w') as model_file:
-        model.print(file=model_file)
+        bpe_model.print(file=model_file)
 
 
 def main():
