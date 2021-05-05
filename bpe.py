@@ -177,11 +177,7 @@ class Statistics:
                 del self.bgrm_dict[pair]
 
     def max_bigram(self):
-        max_bigram = max(self.bgrm_dict.values(), key=lambda bigram: bigram.freq, default=None)
-        if max_bigram is None:
-            return None
-        else:
-            return max_bigram
+        return max(self.bgrm_dict.values(), key=lambda bigram: bigram.freq, default=None)
 
 
 class Model:
