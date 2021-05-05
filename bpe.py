@@ -11,15 +11,15 @@ class Word:
     def __init__(self, token):
         self.token = token
         self.freq = 0
-        # Begin with individual characters plus an end line symbol.
-        self.subwords = list(token) + ["_"]
+        # Begin with individual characters plus an end-of-token symbol, '_'.
+        self.subwords = list(token) + ['_']
 
     def update_freq(self, n):
         self.freq += n
         assert self.freq >= 0, f"Frequency of '{self.token}' is {self.freq}, which is less than 0"
 
     def apply_model(self, model):
-        # Run through each subword grouping operation in order and apply it to the subword mapping.
+        # Run through each subword concatenation operation in order and apply it to the subword mapping.
         subwords = self.subwords
         operations = model.operations
         for pair in operations:
@@ -27,15 +27,16 @@ class Word:
             i = 0
             while i < len(subwords) - 1:
                 if subwords[i] == a and subwords[i + 1] == b:
+                    # Replace target bigram.
                     subwords[i] = a + b
                     del subwords[i + 1]
                 i += 1
 
 
-# Bigram object contains a subword pair, its current overall frequency in the vocabulary,
-# and a dictionary of tokens which currently contain the bigram in their subword mappings.
-# Keeping track of which tokens contain a bigram results in a significant time reduction
-# when removing a bigram from the vocabulary.
+# Bigram object contains a subword pair, its current overall frequency in the vocabulary, and
+# a dictionary of tokens which currently contain the bigram in their subword mappings. Keeping
+# track of which tokens contain a bigram results in a significant time reduction when removing
+# a bigram from the vocabulary, compared to processing every token in the vocabulary.
 class Bigram:
     def __init__(self, pair):
         self.pair = pair
@@ -46,7 +47,7 @@ class Bigram:
         # Update the frequency of the bigram in every token where it has changed.
         for token, n in token_updates.items():
             self.token_freq[token] += n
-            # Remove a token from the frequency dictionary if it no longer contains the bigram
+            # Remove a token from the frequency dictionary if it no longer contains the bigram.
             if not self.token_freq[token]:
                 del self.token_freq[token]
             self.freq += n
@@ -105,9 +106,9 @@ class Vocabulary:
         return len(self.char_set)
 
     def replace_bigram(self, bigram):
-        # For every token which contains the bigram in its current subword mapping,
-        # replace the bigram by grouping its elements into one. Keep track of which other
-        # bigrams are lost and gained in each token's subword mapping and produce a
+        # For every token which contains the target bigram in its current subword mapping,
+        # replace the bigram by concatenating its elements into one. Keep track of which
+        # other bigrams are lost and gained in each token's subword mapping and produce a
         # dictionary of update dictionaries for each bigram.
         a, b = bigram.pair
         tokens = bigram.token_freq.keys()
@@ -118,8 +119,10 @@ class Vocabulary:
             i = 0
             while i < len(subwords) - 1:
                 if subwords[i] == a and subwords[i + 1] == b:
+                    # Replace target bigram.
                     subwords[i] = a + b
                     del subwords[i + 1]
+                    # Update bigram frequencies.
                     updates[(a, b)][token] -= freq
                     if i > 0:
                         updates[(subwords[i - 1], a)][token] -= freq
@@ -139,6 +142,9 @@ class Vocabulary:
             file.write(f"{word.token} {word.freq}\n")
 
 
+# Statistics object contains a dictionary of every subword pair currently appearing in
+# the vocabulary and matches them to corresponding Bigram instances with up-to-date
+# token frequency dictionaries.
 class Statistics:
     def __init__(self):
         self.bgrm_dict = {}
@@ -168,11 +174,12 @@ class Statistics:
         self.bgrm_dict[pair] = new_bigram
 
     def update_bigrams(self, bigram_updates):
+        # For each subword pair in the updates dictionary, update its corresponding Bigram instance.
         for pair, token_updates in bigram_updates.items():
             if self.missing(pair):
                 self.add_bigram(pair)
             self.bgrm_dict[pair].update_token_freq(token_updates)
-            # Remove a bigram from the bigram dictionary if it no longer appears in any subword mappings
+            # Remove a pair from the bigram dictionary if it no longer appears in any subword mappings.
             if not self.bgrm_dict[pair].freq:
                 del self.bgrm_dict[pair]
 
@@ -180,6 +187,8 @@ class Statistics:
         return max(self.bgrm_dict.values(), key=lambda bigram: bigram.freq, default=None)
 
 
+# Model object contains an ordered list of subword concatenation operations. Each operation
+# is represented by a tuple of the two subword strings to be concatenated.
 class Model:
     def __init__(self):
         self.operations = []
