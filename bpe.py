@@ -122,8 +122,7 @@ class Vocabulary:
                     # Replace target bigram.
                     subwords[i] = a + b
                     del subwords[i + 1]
-                    # Update bigram frequencies.
-                    updates[(a, b)][token] -= freq
+                    # Update other bigram frequencies.
                     if i > 0:
                         updates[(subwords[i - 1], a)][token] -= freq
                         updates[(subwords[i - 1], subwords[i])][token] += freq
@@ -173,6 +172,11 @@ class Statistics:
         new_bigram = Bigram(pair)
         self.bgrm_dict[pair] = new_bigram
 
+    def remove_bigram(self, bigram):
+        pair = bigram.pair
+        assert pair in self.bgrm_dict, f"{str(pair)} not in bigram dictionary"
+        del self.bgrm_dict[pair]
+
     def update_bigrams(self, bigram_updates):
         # For each subword pair in the updates dictionary, update its corresponding Bigram instance.
         for pair, token_updates in bigram_updates.items():
@@ -198,12 +202,13 @@ class Model:
         new_model = cls()
         for line in file:
             line = line.upper()
-            entry = line.split()
-            new_model.add_operation((entry[0], entry[1]))
+            a, b = line.split()
+            new_bigram = Bigram((a, b))
+            new_model.add_operation(new_bigram)
         return new_model
 
-    def add_operation(self, pair):
-        self.operations.append(pair)
+    def add_operation(self, bigram):
+        self.operations.append(bigram.pair)
 
     def write(self, file):
         for operation in self.operations:

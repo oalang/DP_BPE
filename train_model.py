@@ -6,7 +6,6 @@ Trains a BPE model from a given vocabulary and saves it to an output file with t
 """
 
 import argparse
-import time
 from bpe import Vocabulary, Statistics, Model
 
 
@@ -61,9 +60,10 @@ def train_model(args):
         if max_bigram is None:
             print(f"Stopped early with {i} operations")
             break
-        bpe_model.add_operation(max_bigram.pair)
+        bpe_model.add_operation(max_bigram)
         bigram_updates = vocab.replace_bigram(max_bigram)
         bigram_stats.update_bigrams(bigram_updates)
+        bigram_stats.remove_bigram(max_bigram)
 
     with open(model_fname, 'w') as model_file:
         bpe_model.write(file=model_file)
