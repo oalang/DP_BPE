@@ -6,23 +6,20 @@ from collections import defaultdict
 import re
 
 
+# Word object contains a token, its frequency in the vocabulary, and its current subword mapping.
 class Word:
     def __init__(self, token):
         self.token = token
         self.freq = 0
+        # Begin with individual characters plus an end line symbol.
         self.subwords = list(token) + ["_"]
 
     def update_freq(self, n):
         self.freq += n
         assert self.freq >= 0, f"Frequency of '{self.token}' is {self.freq}, which is less than 0"
 
-    def show(self):
-        return f"{self.token} {self.freq}"
-
-    def print(self):
-        print(self.show())
-
     def apply_model(self, model):
+        # Run through each subword grouping operation in order and apply it to the subword mapping.
         subwords = self.subwords
         operations = model.operations
         for pair in operations:
@@ -35,6 +32,10 @@ class Word:
                 i += 1
 
 
+# Bigram object contains a subword pair, its current overall frequency in the vocabulary,
+# and a dictionary of tokens which currently contain the bigram in their subword mappings.
+# Keeping track of which tokens contain a bigram results in a significant time reduction
+# when removing a bigram from the vocabulary.
 class Bigram:
     def __init__(self, pair):
         self.pair = pair
@@ -42,20 +43,19 @@ class Bigram:
         self.token_freq = defaultdict(int)
 
     def update_token_freq(self, token_updates):
+        # Update the frequency of the bigram in every token where it has changed.
         for token, n in token_updates.items():
             self.token_freq[token] += n
+            # Remove a token from the frequency dictionary if it no longer contains the bigram
             if not self.token_freq[token]:
                 del self.token_freq[token]
             self.freq += n
         assert self.freq >= 0, f"Frequency of {self.pair} is {self.freq}, which is less than 0"
 
-    def show(self):
-        return f"{self.pair} {self.freq}"
 
-    def print(self):
-        print(str(self.show()))
-
-
+# Vocabulary object contains a dictionary of all the tokens appearing in a given text
+# and matches them to corresponding Word instances with up-to-date subwords mappings.
+# It also keeps a set of all the characters found in its tokens.
 class Vocabulary:
     def __init__(self):
         self.tokn_dict = {}
@@ -96,13 +96,19 @@ class Vocabulary:
         new_word = Word(token)
         self.tokn_dict[token] = new_word
         self.char_set.update(new_word.subwords)
-        if model is not None:
+        # When a BPE model is being applied to a text, a subword mapping is generated for each token
+        # when it is first encountered and added to the vocabulary.
+        if model:
             new_word.apply_model(model)
 
     def num_char(self):
         return len(self.char_set)
 
     def replace_bigram(self, bigram):
+        # For every token which contains the bigram in its current subword mapping,
+        # replace the bigram by grouping its elements into one. Keep track of which other
+        # bigrams are lost and gained in each token's subword mapping and produce a
+        # dictionary of update dictionaries for each bigram.
         a, b = bigram.pair
         tokens = bigram.token_freq.keys()
         updates = defaultdict(lambda: defaultdict(int))
@@ -128,21 +134,9 @@ class Vocabulary:
         subwords = self.tokn_dict[token].subwords
         return ' '.join(subwords)
 
-    def sorted(self):
-        words = sorted(self.tokn_dict.values(), key=lambda word: word.token)
-        words = sorted(words, key=lambda word: word.freq, reverse=True)
-        return words
-
-    def print(self, file=None, max_print=None):
-        i = 0
-        for word in self.sorted():
-            if file is None:
-                word.print()
-            else:
-                file.write(word.show() + "\n")
-            i += 1
-            if max_print is not None and i >= max_print:
-                break
+    def write(self, file):
+        for word in sorted(self.tokn_dict.values(), key=lambda x: (-x.freq, x.token)):
+            file.write(f"{word.token} {word.freq}\n")
 
 
 class Statistics:
@@ -178,6 +172,7 @@ class Statistics:
             if self.missing(pair):
                 self.add_bigram(pair)
             self.bgrm_dict[pair].update_token_freq(token_updates)
+            # Remove a bigram from the bigram dictionary if it no longer appears in any subword mappings
             if not self.bgrm_dict[pair].freq:
                 del self.bgrm_dict[pair]
 
@@ -187,22 +182,6 @@ class Statistics:
             return None
         else:
             return max_bigram
-
-    def sorted(self):
-        bigrams = sorted(self.bgrm_dict.values(), key=lambda bigram: bigram.pair)
-        bigrams = sorted(bigrams, key=lambda bigram: bigram.freq, reverse=True)
-        return bigrams
-
-    def print(self, file=None, max_print=None):
-        i = 0
-        for bigram in self.sorted():
-            if file is None:
-                bigram.print()
-            else:
-                file.write(bigram.show() + "\n")
-            i += 1
-            if max_print is not None and i >= max_print:
-                break
 
 
 class Model:
@@ -221,13 +200,6 @@ class Model:
     def add_operation(self, pair):
         self.operations.append(pair)
 
-    def print(self, file=None, max_print=None):
-        i = 0
+    def write(self, file):
         for operation in self.operations:
-            if file is None:
-                print(operation)
-            else:
-                file.write(operation[0] + " " + operation[1] + "\n")
-            i += 1
-            if max_print is not None and i >= max_print:
-                break
+            file.write(f"{operation[0]} {operation[1]}\n")

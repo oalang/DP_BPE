@@ -66,7 +66,7 @@ def train_model(args):
         bigram_stats.update_bigrams(bigram_updates)
 
     with open(model_fname, 'w') as model_file:
-        bpe_model.print(file=model_file)
+        bpe_model.write(file=model_file)
 
 
 def main():

@@ -45,7 +45,7 @@ def gen_vocab(args):
         vocab = Vocabulary.from_text_file(text_file)
 
     with open(vocab_fname, 'w') as vocab_file:
-        vocab.print(file=vocab_file)
+        vocab.write(file=vocab_file)
 
 
 def main():
