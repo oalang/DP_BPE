@@ -154,17 +154,21 @@ class Vocabulary:
             file.write(f"{word.token} {word.freq}\n")
 
 
-# Statistics object contains a dictionary of every subword pair currently appearing in
-# the vocabulary and matches them to corresponding Bigram instances with up-to-date
-# token frequency dictionaries. It also contains a search set containing a subset of
-# bigrams with frequencies above the current frequency threshold and variables tracking
-# the current threshold and frequency of the most recently removed bigram.
+# Statistics object contains a dictionary of every subword pair currently appearing in the
+# vocabulary and matches them to corresponding Bigram instances with up-to-date token frequency
+# dictionaries. It also contains a search set containing a subset of bigrams with frequencies
+# above the current frequency threshold and variables tracking the current threshold and an upper
+# bound on bigram frequency. The previous search set's size and an adjustment parameter are used
+# to adapt the next frequency threshold to produce a search set closer to the target size.
 class Statistics:
-    def __init__(self):
+    def __init__(self, search_set_target_size=100):
         self.bgrm_dict = {}
         self.search_set = set()
         self.threshold = None
         self.max_freq = 0
+        self.search_set_size = 0
+        self.adaptation_parameter = 0
+        self.search_set_target_size = search_set_target_size
 
     @classmethod
     def from_vocab(cls, vocab):
@@ -184,7 +188,8 @@ class Statistics:
                 bigram.update_token_freq({token: freq})
                 if bigram.freq > new_stats.max_freq:
                     new_stats.max_freq = bigram.freq
-        new_stats.threshold = ceil(new_stats.max_freq / 2)
+        reduction_factor = 1 + 2 ** new_stats.adaptation_parameter
+        new_stats.threshold = ceil(new_stats.max_freq / reduction_factor)
         new_stats.build_search_set()
         return new_stats
 
@@ -224,11 +229,19 @@ class Statistics:
             if bigram.freq == 0:
                 del self.bgrm_dict[pair]
 
+    def adjust_adaptation_parameter(self):
+        if self.search_set_size < .75 * self.search_set_target_size:
+            self.adaptation_parameter += 1
+        elif self.search_set_size > 1.25 * self.search_set_target_size:
+            self.adaptation_parameter -= 2
+
     def build_search_set(self):
         # Iterate through the entire bigram dictionary to build a new search set.
         for bigram in self.bgrm_dict.values():
             if bigram.freq >= self.threshold:
                 bigram.add_to_search_set(self.search_set)
+        self.search_set_size = len(self.search_set)
+        print(f"{len(self.bgrm_dict)} {self.search_set_size} {self.max_freq} {self.threshold} {self.adaptation_parameter}")
 
     def max_bigram(self):
         # Find the most frequent bigram. If the bigram dictionary is empty, all the words in the
@@ -247,7 +260,9 @@ class Statistics:
                 else:
                     max_bigram = max(self.search_set, key=lambda bigram: bigram.freq)
             else:
-                self.threshold = ceil(self.threshold / 2)
+                self.adjust_adaptation_parameter()
+                reduction_factor = 1 + 2 ** self.adaptation_parameter
+                self.threshold = min(ceil(self.threshold / reduction_factor), self.threshold - 1)
                 self.build_search_set()
                 max_bigram = self.max_bigram()
             self.max_freq = max_bigram.freq
