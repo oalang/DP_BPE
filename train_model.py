@@ -56,6 +56,8 @@ def train_model(args):
     bigram_stats = Statistics.from_vocab(vocab)
     bpe_model = Model()
     for i in range(max_operations):
+        if not i % 1:
+            print(f"{i} {len(bigram_stats.bgrm_dict)} {len(bigram_stats.search_set)} {bigram_stats.threshold} {bigram_stats.max_freq}")
         max_bigram = bigram_stats.max_bigram()
         if max_bigram is None:
             print(f"Stopped early with {i} operations")

@@ -34,10 +34,11 @@ class Word:
                 i += 1
 
 
-# Bigram object contains a subword pair, its current overall frequency in the vocabulary, and
-# a dictionary of tokens which currently contain the bigram in their subword mappings. Keeping
-# track of which tokens contain a bigram results in a significant time reduction when removing
-# a bigram from the vocabulary, compared to processing every token in the vocabulary.
+# Bigram object contains a subword pair, its current overall frequency in the vocabulary, a dictionary
+# of tokens which currently contain the bigram in their subword mappings, and a boolean indicating
+# whether or not the bigram is in the current search set for most frequent bigram. Keeping track of
+# which tokens contain a bigram results in a significant time reduction when removing a bigram from
+# the vocabulary, compared to processing every token in the vocabulary.
 class Bigram:
     def __init__(self, pair):
         self.pair = pair
@@ -155,7 +156,9 @@ class Vocabulary:
 
 # Statistics object contains a dictionary of every subword pair currently appearing in
 # the vocabulary and matches them to corresponding Bigram instances with up-to-date
-# token frequency dictionaries.
+# token frequency dictionaries. It also contains a search set containing a subset of
+# bigrams with frequencies above the current frequency threshold and variables tracking
+# the current threshold and frequency of the most recently removed bigram.
 class Statistics:
     def __init__(self):
         self.bgrm_dict = {}
@@ -165,6 +168,9 @@ class Statistics:
 
     @classmethod
     def from_vocab(cls, vocab):
+        # Build the bigram dictionary by counting the bigrams found in each word and scaling the
+        # counts by the word's frequency. Before building the initial search set, use the most
+        # common bigram's frequency to compute the search set's minimum frequency threshold.
         new_stats = cls()
         for word in vocab.tokn_dict.values():
             token = word.token
@@ -201,6 +207,8 @@ class Statistics:
 
     def update_frequencies(self, updates):
         # For each subword pair in the updates dictionary, update its corresponding Bigram instance.
+        # If a bigram's frequency is greater than or equal to the search set's threshold, add it to
+        # the search set. Otherwise, if it is in the search set, remove it.
         for pair, token_updates in updates.items():
             if self.missing(pair):
                 self.add_bigram(pair)
@@ -217,15 +225,24 @@ class Statistics:
                 del self.bgrm_dict[pair]
 
     def build_search_set(self):
+        # Iterate through the entire bigram dictionary to build a new search set.
         for bigram in self.bgrm_dict.values():
             if bigram.freq >= self.threshold:
                 bigram.add_to_search_set(self.search_set)
 
     def max_bigram(self):
+        # Find the most frequent bigram. If the bigram dictionary is empty, all the words in the
+        # vocabulary have been concatenated into single subwords and the function will return
+        # None to end the program early. Otherwise, the search set will be searched for the most
+        # frequent bigram. If the search set is empty, the frequency threshold will be reduced
+        # and a new search set will be built before running max_bigram() again.
         max_bigram = None
         if self.bgrm_dict:
             if self.search_set:
                 if self.max_freq == self.threshold:
+                    # If the frequency of the most recently removed bigram is equal to the frequency threshold,
+                    # all bigrams in the search set have the same frequency. To save time, select an arbitrary
+                    # bigram from the search set.
                     max_bigram = next(iter(self.search_set))
                 else:
                     max_bigram = max(self.search_set, key=lambda bigram: bigram.freq)
