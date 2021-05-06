@@ -217,28 +217,22 @@ class Statistics:
                 del self.bgrm_dict[pair]
 
     def build_search_set(self):
-        max_bigram = None
         for bigram in self.bgrm_dict.values():
-            if max_bigram is None or bigram.freq > max_bigram.freq:
-                max_bigram = bigram
             if bigram.freq >= self.threshold:
                 bigram.add_to_search_set(self.search_set)
-        if not self.search_set:
-            max_bigram.add_to_search_set(self.search_set)
-            self.threshold = max_bigram.freq
-        return max_bigram
 
     def max_bigram(self):
         max_bigram = None
-        if self.search_set:
-            if self.max_freq == self.threshold:
-                max_bigram = next(iter(self.search_set))
+        if self.bgrm_dict:
+            if self.search_set:
+                if self.max_freq == self.threshold:
+                    max_bigram = next(iter(self.search_set))
+                else:
+                    max_bigram = max(self.search_set, key=lambda bigram: bigram.freq)
             else:
-                max_bigram = max(self.search_set, key=lambda bigram: bigram.freq)
-                self.max_freq = max_bigram.freq
-        elif self.bgrm_dict:
-            self.threshold = ceil(self.threshold / 2)
-            max_bigram = self.build_search_set()
+                self.threshold = ceil(self.threshold / 2)
+                self.build_search_set()
+                max_bigram = self.max_bigram()
             self.max_freq = max_bigram.freq
         return max_bigram
 
