@@ -40,7 +40,7 @@ class Arguments:
         if self.model_fname is None:
             message += "Output file must be specified\n"
         if self.max_subwords <= 0:
-            message += "Max operations must be greater than 0\n"
+            message += "Max subwords must be greater than 0\n"
         return message
 
 

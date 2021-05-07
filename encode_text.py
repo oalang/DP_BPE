@@ -40,7 +40,7 @@ class Arguments:
         return message
 
 
-def apply_model(args):
+def encode_text(args):
     model_fname = args.model_fname
     text_fname = args.text_fname
     subwrd_fname = args.subwrd_fname
@@ -67,7 +67,7 @@ def main():
     parser = Arguments.get_parser()
     args = Arguments(parser.parse_args())
     if args.valid():
-        apply_model(args)
+        encode_text(args)
     else:
         print("Error: Invalid Options\n" + args.invalid_opts())
 

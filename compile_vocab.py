@@ -37,7 +37,7 @@ class Arguments:
         return message
 
 
-def gen_vocab(args):
+def compile_vocab(args):
     text_fname = args.text_fname
     vocab_fname = args.vocab_fname
 
@@ -54,7 +54,7 @@ def main():
     parser = Arguments.get_parser()
     args = Arguments(parser.parse_args())
     if args.valid():
-        gen_vocab(args)
+        compile_vocab(args)
     else:
         print("Error: Invalid Options\n" + args.invalid_opts())
 

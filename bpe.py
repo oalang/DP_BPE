@@ -156,7 +156,7 @@ class Vocabulary:
 # vocabulary and matches them to corresponding Bigram instances with up-to-date token frequency
 # dictionaries. It also includes a search set containing a subset of bigrams with frequencies
 # above the current frequency threshold and variables tracking the current threshold and an upper
-# bound on bigram frequency. The previous search set's size and an adjustment parameter are used
+# bound on bigram frequency. The previous search set's size and an adaptation parameter are used
 # to adapt the next frequency threshold to produce a search set closer to the target size.
 class Statistics:
     def __init__(self):

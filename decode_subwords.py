@@ -33,7 +33,7 @@ class Arguments:
         return message
 
 
-def decode_bpe(args):
+def decode_subwords(args):
     subwrd_fname = args.subwrd_fname
     text_fname = args.text_fname
 
@@ -48,7 +48,7 @@ def main():
     parser = Arguments.get_parser()
     args = Arguments(parser.parse_args())
     if args.valid():
-        decode_bpe(args)
+        decode_subwords(args)
     else:
         print("Error: Invalid Options\n" + args.invalid_opts())
 
