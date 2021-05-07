@@ -21,7 +21,7 @@ class Arguments:
     def get_parser():
         parser = argparse.ArgumentParser()
         parser.add_argument("--text",
-                            help="file path to text being processed",
+                            help="file path for text being processed",
                             type=str)
         parser.add_argument("--output",
                             help="file path for vocabulary output",

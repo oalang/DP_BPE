@@ -22,7 +22,7 @@ class Arguments:
     def get_parser():
         parser = argparse.ArgumentParser()
         parser.add_argument("--vocab",
-                            help="file path to vocabulary to be trained on",
+                            help="file path for vocabulary to be trained on",
                             type=str)
         parser.add_argument("--output",
                             help="file path for model output",
