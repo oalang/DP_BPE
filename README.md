@@ -8,7 +8,7 @@ To compile a vocabulary from a text file:
 
     python compile_vocab.py --text <text_file> --output <vocab_file>
 
-The vocabulary file will be of the format:
+The vocabulary file will look like this:
 
     THE 60133
     AND 33258
@@ -21,7 +21,7 @@ To train a bpe model:
 
     python train_model.py --vocab <vocab_file> --max-subwords <number> --output <model_file>
 
-The model file will be of the format:
+The model file will look like this:
 
     E _
     T H
