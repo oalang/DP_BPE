@@ -42,6 +42,6 @@ The encoded file will look like this:
     AND_ THAT_ I F_ SHE_ N O T I C ED_ AN Y TH ING_ O D D_ OR _ OU T_
     B U T_ MISSUS_ RACHEL_ LY ND E_ WAS_ ON E_ OF_ TH O S E_
 
-To decode a file:
+To decode a subwords file:
 
     python decode_subwords.py --subwords <subwrd_file> --output <text_file>
