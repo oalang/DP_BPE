@@ -91,9 +91,8 @@ class Vocabulary:
         new_vocab = cls()
         for line in file:
             line = line.upper()
-            entry = line.split()
-            token = entry[0]
-            freq = int(entry[1])
+            token, freq = line.split()
+            freq = int(freq)
             new_vocab.add_word(token)
             new_vocab.tokn_dict[token].update_freq(freq)
         return new_vocab
