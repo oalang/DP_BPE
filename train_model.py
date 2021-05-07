@@ -49,11 +49,19 @@ def train_model(args):
     model_fname = args.model_fname
     max_subwords = args.max_subwords
 
+    # Load the vocabulary from a file.
     with open(vocab_fname, 'r') as vocab_file:
         vocab = Vocabulary.from_vocab_file(vocab_file)
 
+    # Subtract the number characters in the vocabulary from the maximum number of concatenation operations.
     max_operations = max_subwords - vocab.num_char()
+
+    # Compile initial statistics from the vocabulary.
     bigram_stats = Statistics.from_vocab(vocab)
+
+    # Train a BPE model by iteratively adding the most frequent bigram to the model, replacing that bigram
+    # in the vocabulary's subword mappings with its concatenation, removing it from the statistics, and
+    # updating the frequencies of other bigrams affected by the operation.
     bpe_model = Model()
     for i in range(max_operations):
         max_bigram = bigram_stats.max_bigram()
@@ -64,6 +72,8 @@ def train_model(args):
         updates = vocab.replace_bigram(max_bigram)
         bigram_stats.remove_bigram(max_bigram)
         bigram_stats.update_frequencies(updates)
+
+    # Write the model to a file.
     with open(model_fname, 'w') as model_file:
         bpe_model.write(file=model_file)
 

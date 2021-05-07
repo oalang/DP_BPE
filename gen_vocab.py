@@ -41,9 +41,11 @@ def gen_vocab(args):
     text_fname = args.text_fname
     vocab_fname = args.vocab_fname
 
+    # Compile a vocabulary from a text file.
     with open(text_fname, 'r') as text_file:
         vocab = Vocabulary.from_text_file(text_file)
 
+    # Write the vocabulary to a file.
     with open(vocab_fname, 'w') as vocab_file:
         vocab.write(file=vocab_file)
 
