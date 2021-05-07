@@ -11,7 +11,7 @@ class Arguments:
         self.text_fname = args.output
 
     def valid(self):
-        return self.model_fname is not None and self.text_fname is not None and self.subwrd_fname is not None
+        return self.subwrd_fname is not None and self.text_fname is not None
 
     @staticmethod
     def get_parser():
@@ -38,9 +38,9 @@ def decode_bpe(args):
     text_fname = args.text_fname
 
     # Group subwords into words and write the results to a file.
-    with open(subwrd_fname, 'r') as text_file, open(text_fname, 'w') as subwrd_file:
+    with open(subwrd_fname, 'r') as subwrd_file, open(text_fname, 'w') as text_file:
         for line in subwrd_file:
-            line.replace(" ", "").replace("_", " ").strip()
+            line = line.replace(" ", "").replace("_", " ").strip()
             text_file.write(line + "\n")
 
 
