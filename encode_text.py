@@ -58,7 +58,7 @@ def encode_text(args):
             mappings = []
             for token in line.split():
                 if vocab.missing(token):
-                    vocab.add_word(token, model=model)
+                    vocab.add_word(token, model)
                 mappings.append(vocab.map_to_sbwds(token))
             subwrd_file.write(' '.join(mappings) + "\n")
 
