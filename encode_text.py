@@ -3,6 +3,7 @@ Uses a BPE model to breakup a text file into subwords and writes the result to a
 """
 
 import argparse
+
 from bpe import Vocabulary, Model
 
 

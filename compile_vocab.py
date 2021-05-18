@@ -6,6 +6,7 @@ Extracts word tokens and frequencies from text and saves them to an output file 
 """
 
 import argparse
+
 from bpe import Vocabulary
 
 

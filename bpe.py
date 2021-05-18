@@ -246,13 +246,12 @@ class Statistics:
         max_bigram = None
         if self.bgrm_dict:
             if self.search_set:
-                if self.max_freq == self.threshold:
-                    # If the frequency of the most recently removed bigram is equal to the frequency threshold,
-                    # all bigrams in the search set have the same frequency. To save time, instead of running
-                    # max(), select an arbitrary bigram from the search set.
-                    max_bigram = next(iter(self.search_set))
-                else:
-                    max_bigram = max(self.search_set, key=lambda bigram: bigram.freq)
+                max_bigram = next(iter(self.search_set))
+                for bigram in self.search_set:
+                    if bigram.freq > max_bigram.freq:
+                        max_bigram = bigram
+                    elif max_bigram.freq == self.max_freq:
+                        break
             else:
                 self.adjust_adaptation_parameter()
                 reduction_factor = 1 + 2 ** self.adaptation_parameter
