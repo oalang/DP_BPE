@@ -20,7 +20,7 @@ class Arguments:
 
     @staticmethod
     def get_parser():
-        parser = argparse.ArgumentParser()
+        parser = argparse.ArgumentParser(description=__doc__)
         parser.add_argument("--text",
                             help="file path for text being processed",
                             type=str)

@@ -21,7 +21,7 @@ class Arguments:
 
     @staticmethod
     def get_parser():
-        parser = argparse.ArgumentParser()
+        parser = argparse.ArgumentParser(description=__doc__)
         parser.add_argument("--vocab",
                             help="file path for vocabulary to be trained on",
                             type=str)

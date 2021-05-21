@@ -18,7 +18,7 @@ class Arguments:
 
     @staticmethod
     def get_parser():
-        parser = argparse.ArgumentParser()
+        parser = argparse.ArgumentParser(description=__doc__)
         parser.add_argument("--model",
                             help="file path for bpe model",
                             type=str)
