@@ -83,11 +83,7 @@ def main():
     parser = Arguments.get_parser()
     args = Arguments(parser.parse_args())
     if args.valid():
-        import time
-        start = time.time()
-        for _ in range(100):
-            train_model(args)
-        print(time.time()-start)
+        train_model(args)
     else:
         print("Error: Invalid Options\n" + args.invalid_opts())
 
