@@ -15,9 +15,12 @@ SEARCH_SET_TARGET_SIZE = 100
 
 # Word object contains a token, its frequency in the vocabulary, and its current subword mapping.
 class Word:
+    """
+
+    """
     def __init__(self, token: str) -> None:
         """
-        Initialize a Word instance.
+        Initializes a Word instance.
 
         The new instance will have an initial frequency of zero and a subword string
         split into individual characters followed by the end-of-token symbol '_'.
@@ -32,7 +35,7 @@ class Word:
 
     def update_freq(self, n: int) -> None:
         """
-        Add n to the Word's frequency.
+        Adds n to the Word's frequency.
 
         Args:
             n: The number to add to the Word's frequency
@@ -42,7 +45,7 @@ class Word:
 
     def apply_model(self, model: BPEModel) -> None:
         """
-        Apply a BPEModel to the Word to arrange its characters into subwords.
+        Applies a BPEModel to the Word to arrange its characters into subwords.
 
         Runs through each subword concatenation operation in order and applies it to
         the subword mapping.
@@ -72,7 +75,7 @@ class Word:
 class Bigram:
     def __init__(self, pair: tuple) -> None:
         """
-        Initialize a Bigram instance.
+        Initializes a Bigram instance.
 
         The new instance will have an initial frequency of zero.
 
@@ -87,7 +90,7 @@ class Bigram:
 
     def update_token_frequencies(self, token_updates: dict) -> None:
         """
-        Update the Bigram's frequency statistics.
+        Updates the Bigram's frequency statistics.
 
         Updates the frequency of the Bigram for every Word where it has changed, and
         also its overall frequency.
@@ -106,7 +109,7 @@ class Bigram:
 
     def add_to_search_set(self, search_set: set) -> None:
         """
-        Add the Bigram to the search set.
+        Adds the Bigram to the search set.
 
         Adds the Bigram to the search set and sets its in_search_set flag to True.
 
@@ -119,7 +122,7 @@ class Bigram:
 
     def remove_from_search_set(self, search_set: set) -> None:
         """
-        Remove the Bigram from the search set.
+        Removes the Bigram from the search set.
 
         Removes the Bigram from the search set and sets its in_search_set flag to False.
 
@@ -137,7 +140,7 @@ class Bigram:
 class Vocabulary:
     def __init__(self) -> None:
         """
-        Initialize an empty Vocabulary instance.
+        Initializes an empty Vocabulary instance.
         """
 
         self.tokn_dict = {}
@@ -146,7 +149,7 @@ class Vocabulary:
     @classmethod
     def from_text_file(cls, file: TextIO) -> Vocabulary:
         """
-        Initialize a Vocabulary from a text file.
+        Initializes a Vocabulary from a text file.
 
         Normalizes the text by removing punctuation and capitalizing everything. Generates
         a new Word instance for each unique token string and counts its occurrences.
@@ -171,7 +174,7 @@ class Vocabulary:
     @classmethod
     def from_vocab_file(cls, file: TextIO) -> Vocabulary:
         """
-        Initialize a Vocabulary from a vocabulary file.
+        Initializes a Vocabulary from a vocabulary file.
 
         Reads in a vocabulary file with each line containing a unique token string followed
         by its frequency in the training set. For example, "THE 4827".
@@ -194,7 +197,7 @@ class Vocabulary:
 
     def missing(self, token: str) -> bool:
         """
-        Check if a token string is missing from the token dictionary.
+        Checks if a token string is missing from the token dictionary.
 
         Args:
             token: The token string to be searched for
@@ -210,13 +213,13 @@ class Vocabulary:
 
     def add_word(self, token: str, model: Optional[BPEModel] = None) -> None:
         """
-        Add a Word to the token dictionary.
+        Adds a Word to the token dictionary.
 
         If a BPEModel is provided, it is applied to the Word to produce a subword mapping.
 
         Args:
             token: A token string representing the Word to be added
-            model: A BPEModel used produce a subword mapping
+            model: Optional; A BPEModel used produce a subword mapping
         """
 
         new_word = Word(token)
@@ -227,7 +230,7 @@ class Vocabulary:
 
     def num_char(self) -> int:
         """
-        Return the size of the Vocabulary's character set.
+        Returns the size of the Vocabulary's character set.
 
         Returns:
             The size of the Vocabulary's character set
@@ -237,7 +240,7 @@ class Vocabulary:
 
     def replace_bigram(self, bigram: Bigram) -> dict:
         """
-        Replace every instance of a given Bigram in the Vocabulary.
+        Replaces every instance of a given Bigram in the Vocabulary.
 
         For every Word which contains the target subword pair in its current subword mapping,
         replace the subword pair by concatenating its elements into one subword. Keep track
@@ -275,7 +278,7 @@ class Vocabulary:
 
     def map_to_sbwds(self, token: str) -> str:
         """
-        Map a token string to a subwords string.
+        Maps a token string to a subwords string.
 
         Args:
             token: The token string to be mapped
@@ -289,7 +292,7 @@ class Vocabulary:
 
     def write(self, file: TextIO) -> None:
         """
-        Write the Vocabulary to a file.
+        Writes the Vocabulary to a file.
 
         Writes a vocabulary file with each line containing a unique string token followed
         by its frequency in the training set. For example, "THE 4827". The Vocabulary is
@@ -312,7 +315,7 @@ class Vocabulary:
 class Statistics:
     def __init__(self) -> None:
         """
-        Initialize an empty Statistics instance.
+        Initializes an empty Statistics instance.
         """
 
         self.bgrm_dict = {}
@@ -324,7 +327,7 @@ class Statistics:
     @classmethod
     def from_vocab(cls, vocab: Vocabulary) -> Statistics:
         """
-        Initialize a Statistics instance with a given Vocabulary.
+        Initializes a Statistics instance with a given Vocabulary.
 
         Builds a bigram dictionary by counting the subword pairs found in each Word and scaling
         the counts by the Word's frequency. Before building the initial search set, it uses the
@@ -356,7 +359,7 @@ class Statistics:
 
     def missing(self, pair: tuple) -> bool:
         """
-        Check if a subword pair is missing from the bigram dictionary.
+        Checks if a subword pair is missing from the bigram dictionary.
 
         Args:
             pair: The subword pair to be searched for
@@ -372,7 +375,7 @@ class Statistics:
 
     def add_bigram(self, pair: tuple) -> None:
         """
-        Add a Bigram to the bigram dictionary.
+        Adds a Bigram to the bigram dictionary.
 
         Args:
             pair: A subword pair representing the Bigram to be added
@@ -383,7 +386,7 @@ class Statistics:
 
     def remove_bigram(self, bigram: Bigram) -> None:
         """
-        Remove a Bigram from the bigram dictionary and the search set.
+        Removes a Bigram from the bigram dictionary and the search set.
 
         Args:
             bigram: The Bigram to be removed
@@ -395,7 +398,7 @@ class Statistics:
 
     def update_pair_frequencies(self, pair_updates: dict) -> None:
         """
-        Update the frequency statistics for each subword pair in the given update dictionary.
+        Updates the frequency statistics for each subword pair in the given update dictionary.
 
         For each subword pair in the update dictionary, update its corresponding Bigram instance.
         If a Bigram's frequency is greater than or equal to the search set's threshold, add it to
@@ -422,12 +425,12 @@ class Statistics:
 
     def set_threshold(self, max_freq: Optional[int] = None) -> None:
         """
-        Set a new frequency threshold for the search set.
+        Sets a new frequency threshold for the search set.
 
         If a maximum bigram frequency is provided, use it in place of the previous threshold.
 
         Args:
-            max_freq: The maximum bigram frequency
+            max_freq: Optional; The maximum bigram frequency
         """
 
         previous_threshold = self.threshold
@@ -438,10 +441,10 @@ class Statistics:
 
     def build_search_set(self) -> None:
         """
-        Build a new search set.
+        Builds a new search set.
 
-        Iterate through the entire bigram dictionary and add to the search set each Bigram
-        that meets the frequency threshold. Afterwards, adjust the adaptation parameter so
+        Iterates through the entire bigram dictionary and adds to the search set each Bigram
+        that meets the frequency threshold. Afterwards, adjusts the adaptation parameter so
         that the next search set is closer to the target size.
         """
 
@@ -456,7 +459,7 @@ class Statistics:
 
     def max_bigram(self) -> Bigram:
         """
-        Find the most frequent Bigram.
+        Finds the most frequent Bigram.
 
         If the bigram dictionary is empty, all the words in the vocabulary have been
         concatenated into single subwords and the function will return None. Otherwise,
@@ -490,7 +493,7 @@ class Statistics:
 class BPEModel:
     def __init__(self) -> None:
         """
-        Initialize an empty BPEModel instance.
+        Initializes an empty BPEModel instance.
         """
 
         self.operations = []
@@ -498,7 +501,7 @@ class BPEModel:
     @classmethod
     def from_model_file(cls, file: TextIO) -> BPEModel:
         """
-        Initialize a BPEModel from a model file.
+        Initializes a BPEModel from a model file.
 
         Reads in a model file containing an ordered list of unique subword concatenation
         operations. Each line contains an operation represented by the two subword strings
@@ -521,7 +524,7 @@ class BPEModel:
 
     def add_operation(self, bigram: Bigram) -> None:
         """
-        Add an operation to the BPEModel.
+        Adds an operation to the BPEModel.
 
         Args:
             bigram: The Bigram to be added as a subword concatenation operation
@@ -531,7 +534,7 @@ class BPEModel:
 
     def write(self, file: TextIO) -> None:
         """
-        Write the BPEModel to a file.
+        Writes the BPEModel to a file.
 
         Writes a model file with an ordered list of unique subword concatenation
         operations. Each line contains an operation represented by the two subword
