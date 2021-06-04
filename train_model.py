@@ -7,7 +7,7 @@ Trains a BPE model from a given vocabulary and saves it to an output file with t
 
 import argparse
 
-from bpe import Vocabulary, Statistics, Model
+from bpe import Vocabulary, Statistics, BPEModel
 
 
 class Arguments:
@@ -63,16 +63,16 @@ def train_model(args):
     # Train a BPE model by iteratively adding the most frequent bigram to the model, replacing that bigram
     # in the vocabulary's subword mappings with its concatenation, removing it from the statistics, and
     # updating the frequencies of other bigrams affected by the operation.
-    bpe_model = Model()
+    bpe_model = BPEModel()
     for i in range(max_operations):
         max_bigram = bigram_stats.max_bigram()
         if max_bigram is None:
             print(f"Stopped early with {i} operations")
             break
         bpe_model.add_operation(max_bigram)
-        updates = vocab.replace_bigram(max_bigram)
+        pair_updates = vocab.replace_bigram(max_bigram)
         bigram_stats.remove_bigram(max_bigram)
-        bigram_stats.update_frequencies(updates)
+        bigram_stats.update_pair_frequencies(pair_updates)
 
     # Write the model to a file.
     with open(model_fname, 'w') as model_file:
