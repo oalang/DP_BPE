@@ -3,7 +3,7 @@ Classes and methods for generating a vocabulary, training a BPE model, and apply
 """
 
 from __future__ import annotations
-from typing import Optional, TextIO
+from typing import Dict, Optional, Set, TextIO, Tuple
 from collections import defaultdict
 from math import ceil
 import re
@@ -52,7 +52,7 @@ class Word:
             model: The BPEModel to be used.
         """
 
-        # Runs through each subword concatenation operation in order and applies it to
+        # Run through each subword concatenation operation in order and apply it to
         # the subword mapping.
         subwords = self.subwords
         operations = model.operations
@@ -75,15 +75,15 @@ class Bigram:
     every token in the vocabulary.
 
     Attributes:
-        pair (tuple): A pair of subword strings representing the Bigram.
+        pair (Tuple[str, str]): A pair of subword strings representing the Bigram.
         freq (int): The Bigram's frequency in the text used to generate the Vocabulary.
-        token_freq (dict): A dictionary of tokens which currently contain the Bigram in
-            their subword mappings.
+        token_freq (Dict[str, int]): A dictionary of tokens which currently contain the
+            Bigram in their subword mappings.
         in_search_set (bool): A boolean indicating whether or not the Bigram is in the
             current search set for most frequent Bigram.
     """
 
-    def __init__(self, pair: tuple) -> None:
+    def __init__(self, pair: Tuple[str, str]) -> None:
         """Initializes a Bigram instance.
 
         The new instance will have an initial frequency of zero.
@@ -97,7 +97,7 @@ class Bigram:
         self.token_freq = defaultdict(int)
         self.in_search_set = False
 
-    def update_token_frequencies(self, token_updates: dict) -> None:
+    def update_token_frequencies(self, token_updates: Dict[str, int]) -> None:
         """Updates the Bigram's frequency statistics.
 
         Updates the frequency of the Bigram for every Word where it has changed, and
@@ -115,7 +115,7 @@ class Bigram:
                 del self.token_freq[token]
             self.freq += n
 
-    def add_to_search_set(self, search_set: set) -> None:
+    def add_to_search_set(self, search_set: Set[Bigram]) -> None:
         """Adds the Bigram to the search set.
 
         Adds the Bigram to the search set and sets its in_search_set flag to True.
@@ -127,7 +127,7 @@ class Bigram:
         search_set.add(self)
         self.in_search_set = True
 
-    def remove_from_search_set(self, search_set: set) -> None:
+    def remove_from_search_set(self, search_set: Set[Bigram]) -> None:
         """Removes the Bigram from the search set.
 
         Removes the Bigram from the search set and sets its in_search_set flag to False.
@@ -237,7 +237,7 @@ class Vocabulary:
 
         return len(self.char_set)
 
-    def replace_bigram(self, bigram: Bigram) -> dict:
+    def replace_bigram(self, bigram: Bigram) -> Dict[Tuple[str, str], Dict[str, int]]:
         """Replaces every instance of a given Bigram in the Vocabulary.
 
         Args:
@@ -348,7 +348,7 @@ class Statistics:
         new_stats.build_search_set()
         return new_stats
 
-    def missing(self, pair: tuple) -> bool:
+    def missing(self, pair: Tuple[str, str]) -> bool:
         """Checks if a subword pair is missing from the bigram dictionary.
 
         Args:
@@ -363,7 +363,7 @@ class Statistics:
         else:
             return True
 
-    def add_bigram(self, pair: tuple) -> None:
+    def add_bigram(self, pair: Tuple[str, str]) -> None:
         """Adds a Bigram to the bigram dictionary.
 
         Args:
