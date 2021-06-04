@@ -15,7 +15,7 @@ SEARCH_SET_TARGET_SIZE = 100
 
 # Word object contains a token, its frequency in the vocabulary, and its current subword mapping.
 class Word:
-    def __init__(self, token: str):
+    def __init__(self, token: str) -> None:
         """
         Initialize a Word instance.
 
@@ -70,7 +70,7 @@ class Word:
 # which tokens contain a bigram results in a significant time reduction when removing a bigram from
 # the vocabulary, compared to processing every token in the vocabulary.
 class Bigram:
-    def __init__(self, pair: tuple):
+    def __init__(self, pair: tuple) -> None:
         """
         Initialize a Bigram instance.
 
@@ -135,7 +135,7 @@ class Bigram:
 # and matches them to corresponding Word instances with up-to-date subwords mappings.
 # It also keeps a set of all the characters found in its tokens.
 class Vocabulary:
-    def __init__(self):
+    def __init__(self) -> None:
         """
         Initialize an empty Vocabulary instance.
         """
@@ -310,15 +310,15 @@ class Vocabulary:
 # bound on bigram frequency. The previous search set's size and an adaptation parameter are used
 # to adapt the next frequency threshold to produce a search set closer to the target size.
 class Statistics:
-    def __init__(self):
+    def __init__(self) -> None:
         """
         Initialize an empty Statistics instance.
         """
 
         self.bgrm_dict = {}
+        self.max_freq = 0
         self.search_set = set()
         self.threshold = None
-        self.max_freq = 0
         self.search_set_size = 0
         self.adaptation_parameter = 0
 
@@ -478,7 +478,7 @@ class Statistics:
 # Model object contains an ordered list of subword concatenation operations. Each operation
 # is represented by a tuple of the two subword strings to be concatenated.
 class BPEModel:
-    def __init__(self):
+    def __init__(self) -> None:
         """
         Initialize an empty BPEModel instance.
         """
