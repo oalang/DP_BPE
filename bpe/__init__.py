@@ -8,9 +8,10 @@ from collections import defaultdict
 from math import ceil
 import re
 
+StrPair = Tuple[str, str]
 
-# This search set size was found to produce speedy results.
-SEARCH_SET_TARGET_SIZE = 100
+_SEARCH_SET_TARGET_SIZE = 100
+"""int: This search set size was found to produce speedy results."""
 
 
 class Word:
@@ -55,8 +56,7 @@ class Word:
         # Run through each subword concatenation operation in order and apply it to
         # the subword mapping.
         subwords = self.subwords
-        operations = model.operations
-        for pair in operations:
+        for pair in model.operations:
             a, b = pair
             i = 0
             while i < len(subwords) - 1:
@@ -75,7 +75,7 @@ class Bigram:
     every token in the vocabulary.
 
     Attributes:
-        pair (Tuple[str, str]): A pair of subword strings representing the Bigram.
+        pair (Pair): A pair of subword strings representing the Bigram.
         freq (int): The Bigram's frequency in the text used to generate the Vocabulary.
         token_freq (Dict[str, int]): A dictionary of tokens which currently contain the
             Bigram in their subword mappings.
@@ -83,7 +83,7 @@ class Bigram:
             current search set for most frequent Bigram.
     """
 
-    def __init__(self, pair: Tuple[str, str]) -> None:
+    def __init__(self, pair: StrPair) -> None:
         """Initializes a Bigram instance.
 
         The new instance will have an initial frequency of zero.
@@ -237,7 +237,7 @@ class Vocabulary:
 
         return len(self.char_set)
 
-    def replace_bigram(self, bigram: Bigram) -> Dict[Tuple[str, str], Dict[str, int]]:
+    def replace_bigram(self, bigram: Bigram) -> Dict[StrPair, Dict[str, int]]:
         """Replaces every instance of a given Bigram in the Vocabulary.
 
         Args:
@@ -308,6 +308,23 @@ class Vocabulary:
 # bound on bigram frequency. The previous search set's size and an adaptation parameter are used
 # to adapt the next frequency threshold to produce a search set closer to the target size.
 class Statistics:
+    """A data structure used to keep track of Bigram frequencies in a Vocabulary.
+
+    Statistics keeps track of the changes in Bigram frequency as a Vocabulary is
+    altered by subword concatenation operations and provides a fast method for
+    finding the most frequent bigram.
+
+    Attributes:
+        bgrm_dict (Dict[StrPair, Bigram]): A dictionary of subword pairs currently
+            found in the Vocabulary.
+        max_freq (int): The frequency of the most common Bigram.
+        search_set (Set[Bigram]): A subset of bigrams guaranteed to contain the most
+            frequent Bigram.
+        threshold (int): The minimum frequency threshold for inclusion in search_set.
+        adaptation_parameter (int): A parameter used to compute the next threshold
+            which is adaptively tuned to make the the next search_set closer to the
+            target size.
+    """
     def __init__(self) -> None:
         """Initializes an empty Statistics instance."""
 
@@ -348,7 +365,7 @@ class Statistics:
         new_stats.build_search_set()
         return new_stats
 
-    def missing(self, pair: Tuple[str, str]) -> bool:
+    def missing(self, pair: StrPair) -> bool:
         """Checks if a subword pair is missing from the bigram dictionary.
 
         Args:
@@ -363,7 +380,7 @@ class Statistics:
         else:
             return True
 
-    def add_bigram(self, pair: Tuple[str, str]) -> None:
+    def add_bigram(self, pair: StrPair) -> None:
         """Adds a Bigram to the bigram dictionary.
 
         Args:
@@ -434,9 +451,9 @@ class Statistics:
             if bigram.freq >= self.threshold:
                 bigram.add_to_search_set(self.search_set)
         search_set_size = len(self.search_set)
-        if search_set_size < SEARCH_SET_TARGET_SIZE:
+        if search_set_size < _SEARCH_SET_TARGET_SIZE:
             self.adaptation_parameter += 1
-        elif search_set_size > SEARCH_SET_TARGET_SIZE:
+        elif search_set_size > _SEARCH_SET_TARGET_SIZE:
             self.adaptation_parameter -= 2
 
     def max_bigram(self) -> Bigram:
@@ -467,9 +484,16 @@ class Statistics:
         return max_bigram
 
 
-# Model object contains an ordered list of subword concatenation operations. Each operation
-# is represented by a tuple of the two subword strings to be concatenated.
 class BPEModel:
+    """A Bight Pair Encoding model.
+
+    The model consists of an ordered list of subword concatenation operations. Each operation
+    is represented by a tuple of the two subword strings to be concatenated.
+
+    Attributes:
+        operations (List[Pair]): An ordered list of subword concatenation operations.
+    """
+
     def __init__(self) -> None:
         """Initializes an empty BPEModel instance."""
 
