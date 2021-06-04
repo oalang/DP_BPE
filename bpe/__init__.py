@@ -3,7 +3,7 @@ Classes and methods for generating a vocabulary, training a BPE model, and apply
 """
 
 from __future__ import annotations
-from typing import TextIO
+from typing import Optional, TextIO
 from collections import defaultdict
 from math import ceil
 import re
@@ -208,7 +208,7 @@ class Vocabulary:
         else:
             return True
 
-    def add_word(self, token: str, model: BPEModel = None) -> None:
+    def add_word(self, token: str, model: Optional[BPEModel] = None) -> None:
         """
         Add a Word to the token dictionary.
 
@@ -319,7 +319,6 @@ class Statistics:
         self.max_freq = 0
         self.search_set = set()
         self.threshold = None
-        self.search_set_size = 0
         self.adaptation_parameter = 0
 
     @classmethod
@@ -351,8 +350,7 @@ class Statistics:
                 bigram.update_token_frequencies({token: freq})
                 if bigram.freq > new_stats.max_freq:
                     new_stats.max_freq = bigram.freq
-        reduction_factor = 1 + 2 ** new_stats.adaptation_parameter
-        new_stats.threshold = ceil(new_stats.max_freq / reduction_factor)
+        new_stats.set_threshold(new_stats.max_freq)
         new_stats.build_search_set()
         return new_stats
 
@@ -422,25 +420,39 @@ class Statistics:
             if bigram.freq == 0:
                 del self.bgrm_dict[pair]
 
-    def adjust_adaptation_parameter(self) -> None:
+    def set_threshold(self, max_freq: Optional[int] = None) -> None:
         """
-        Adjust the adaptation parameter so that the next search set is closer to the target size.
+        Set a new frequency threshold for the search set.
+
+        If a maximum bigram frequency is provided, use it in place of the previous threshold.
+
+        Args:
+            max_freq: The maximum bigram frequency
         """
 
-        if self.search_set_size < SEARCH_SET_TARGET_SIZE:
-            self.adaptation_parameter += 1
-        elif self.search_set_size > SEARCH_SET_TARGET_SIZE:
-            self.adaptation_parameter -= 2
+        previous_threshold = self.threshold
+        if max_freq:
+            previous_threshold = max_freq
+        reduction_factor = 1 + 2 ** self.adaptation_parameter
+        self.threshold = min(ceil(previous_threshold / reduction_factor), previous_threshold - 1)
 
     def build_search_set(self) -> None:
         """
-        Iterate through the entire bigram dictionary to build a new search set.
+        Build a new search set.
+
+        Iterate through the entire bigram dictionary and add to the search set each Bigram
+        that meets the frequency threshold. Afterwards, adjust the adaptation parameter so
+        that the next search set is closer to the target size.
         """
 
         for bigram in self.bgrm_dict.values():
             if bigram.freq >= self.threshold:
                 bigram.add_to_search_set(self.search_set)
-        self.search_set_size = len(self.search_set)
+        search_set_size = len(self.search_set)
+        if search_set_size < SEARCH_SET_TARGET_SIZE:
+            self.adaptation_parameter += 1
+        elif search_set_size > SEARCH_SET_TARGET_SIZE:
+            self.adaptation_parameter -= 2
 
     def max_bigram(self) -> Bigram:
         """
@@ -466,9 +478,7 @@ class Statistics:
                     elif max_bigram.freq == self.max_freq:
                         break
             else:
-                self.adjust_adaptation_parameter()
-                reduction_factor = 1 + 2 ** self.adaptation_parameter
-                self.threshold = min(ceil(self.threshold / reduction_factor), self.threshold - 1)
+                self.set_threshold()
                 self.build_search_set()
                 max_bigram = self.max_bigram()
             self.max_freq = max_bigram.freq
