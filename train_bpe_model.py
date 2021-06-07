@@ -12,21 +12,21 @@ from bpe import Vocabulary, Statistics, BPEModel
 
 class Arguments:
     def __init__(self, args):
-        self.vocab_fname = args.vocab
-        self.model_fname = args.output
+        self.vocabulary_fname = args.vocabulary
+        self.bpe_model_fname = args.output
         self.max_subwords = args.max_subwords
 
     def valid(self):
-        return self.vocab_fname is not None and self.model_fname is not None and self.max_subwords > 0
+        return self.vocabulary_fname is not None and self.bpe_model_fname is not None and self.max_subwords > 0
 
     @staticmethod
     def get_parser():
         parser = argparse.ArgumentParser(description=__doc__)
-        parser.add_argument("--vocab",
+        parser.add_argument("--vocabulary",
                             help="file path for vocabulary to be trained on",
                             type=str)
         parser.add_argument("--output",
-                            help="file path for model output",
+                            help="file path for BPE model output",
                             type=str)
         parser.add_argument("--max-subwords",
                             help="maximum size of subword vocabulary",
@@ -36,54 +36,54 @@ class Arguments:
 
     def invalid_opts(self):
         message = ""
-        if self.vocab_fname is None:
+        if self.vocabulary_fname is None:
             message += "Vocabulary file must be specified\n"
-        if self.model_fname is None:
+        if self.bpe_model_fname is None:
             message += "Output file must be specified\n"
         if self.max_subwords <= 0:
             message += "Max subwords must be greater than 0\n"
         return message
 
 
-def train_model(args):
-    vocab_fname = args.vocab_fname
-    model_fname = args.model_fname
+def train_bpe_model(args):
+    vocabulary_fname = args.vocabulary_fname
+    bpe_model_fname = args.bpe_model_fname
     max_subwords = args.max_subwords
 
     # Load the vocabulary from a file.
-    with open(vocab_fname, 'r') as vocab_file:
-        vocab = Vocabulary.from_vocab_file(vocab_file)
+    with open(vocabulary_fname, 'r') as vocabulary_file:
+        vocabulary = Vocabulary.from_vocabulary_file(vocabulary_file)
 
     # Subtract the number characters in the vocabulary from the maximum number of concatenation operations.
-    max_operations = max_subwords - vocab.num_char()
+    max_operations = max_subwords - vocabulary.num_characters()
 
     # Compile initial statistics from the vocabulary.
-    bigram_stats = Statistics.from_vocab(vocab)
+    statistics = Statistics.from_vocabulary(vocabulary)
 
     # Train a BPE model by iteratively adding the most frequent bigram to the model, replacing that bigram
     # in the vocabulary's subword mappings with its concatenation, removing it from the statistics, and
     # updating the frequencies of other bigrams affected by the operation.
     bpe_model = BPEModel()
     for i in range(max_operations):
-        max_bigram = bigram_stats.max_bigram()
+        max_bigram = statistics.max_bigram()
         if max_bigram is None:
             print(f"Stopped early with {i} operations")
             break
         bpe_model.add_operation(max_bigram)
-        pair_updates = vocab.replace_bigram(max_bigram)
-        bigram_stats.remove_bigram(max_bigram)
-        bigram_stats.update_pair_frequencies(pair_updates)
+        bigram_updates = vocabulary.replace_bigram(max_bigram)
+        statistics.remove_bigram(max_bigram)
+        statistics.update_bigram_frequencies(bigram_updates)
 
-    # Write the model to a file.
-    with open(model_fname, 'w') as model_file:
-        bpe_model.write(file=model_file)
+    # Write the bpe_model to a file.
+    with open(bpe_model_fname, 'w') as bpe_model_file:
+        bpe_model.write(file=bpe_model_file)
 
 
 def main():
     parser = Arguments.get_parser()
     args = Arguments(parser.parse_args())
     if args.valid():
-        train_model(args)
+        train_bpe_model(args)
     else:
         print("Error: Invalid Options\n" + args.invalid_opts())
 

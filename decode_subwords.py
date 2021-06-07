@@ -7,11 +7,11 @@ import argparse
 
 class Arguments:
     def __init__(self, args):
-        self.subwrd_fname = args.subwords
+        self.subword_fname = args.subwords
         self.text_fname = args.output
 
     def valid(self):
-        return self.subwrd_fname is not None and self.text_fname is not None
+        return self.subword_fname is not None and self.text_fname is not None
 
     @staticmethod
     def get_parser():
@@ -26,7 +26,7 @@ class Arguments:
 
     def invalid_opts(self):
         message = ""
-        if self.subwrd_fname is None:
+        if self.subword_fname is None:
             message += "Subword file must be specified\n"
         if self.text_fname is None:
             message += "Output file must be specified\n"
@@ -34,12 +34,12 @@ class Arguments:
 
 
 def decode_subwords(args):
-    subwrd_fname = args.subwrd_fname
+    subword_fname = args.subword_fname
     text_fname = args.text_fname
 
     # Group subwords into words and write the results to a file.
-    with open(subwrd_fname, 'r') as subwrd_file, open(text_fname, 'w') as text_file:
-        for line in subwrd_file:
+    with open(subword_fname, 'r') as subword_file, open(text_fname, 'w') as text_file:
+        for line in subword_file:
             line = line.replace(" ", "").replace("_", " ").strip()
             text_file.write(line + "\n")
 

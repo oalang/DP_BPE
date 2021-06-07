@@ -13,10 +13,10 @@ from bpe import Vocabulary
 class Arguments:
     def __init__(self, args):
         self.text_fname = args.text
-        self.vocab_fname = args.output
+        self.vocabulary_fname = args.output
 
     def valid(self):
-        return self.text_fname is not None and self.vocab_fname is not None
+        return self.text_fname is not None and self.vocabulary_fname is not None
 
     @staticmethod
     def get_parser():
@@ -33,29 +33,29 @@ class Arguments:
         message = ""
         if self.text_fname is None:
             message += "Text file must be specified\n"
-        if self.vocab_fname is None:
+        if self.vocabulary_fname is None:
             message += "Output file must be specified\n"
         return message
 
 
-def compile_vocab(args):
+def compile_vocabulary(args):
     text_fname = args.text_fname
-    vocab_fname = args.vocab_fname
+    vocabulary_fname = args.vocabulary_fname
 
     # Compile a vocabulary from a text file.
     with open(text_fname, 'r') as text_file:
-        vocab = Vocabulary.from_text_file(text_file)
+        vocabulary = Vocabulary.from_text_file(text_file)
 
     # Write the vocabulary to a file.
-    with open(vocab_fname, 'w') as vocab_file:
-        vocab.write(file=vocab_file)
+    with open(vocabulary_fname, 'w') as vocabulary_file:
+        vocabulary.write(file=vocabulary_file)
 
 
 def main():
     parser = Arguments.get_parser()
     args = Arguments(parser.parse_args())
     if args.valid():
-        compile_vocab(args)
+        compile_vocabulary(args)
     else:
         print("Error: Invalid Options\n" + args.invalid_opts())
 
