@@ -33,7 +33,7 @@ class Arguments:
     def invalid_opts(self):
         message = ""
         if self.bpe_model_fname is None:
-            message += "Model file must be specified\n"
+            message += "BPE model file must be specified\n"
         if self.text_fname is None:
             message += "Text file must be specified\n"
         if self.subword_fname is None:

@@ -56,13 +56,13 @@ class Word:
         # Run through each subword concatenation operation in order and apply it to
         # the subword mapping.
         subwords = self.subwords
-        for pair in bpe_model.operations:
-            a, b = pair
+        for subword_pair in bpe_model.operations:
+            subword_a, subword_b = subword_pair
             i = 0
             while i < len(subwords) - 1:
-                if subwords[i] == a and subwords[i + 1] == b:
+                if subwords[i] == subword_a and subwords[i + 1] == subword_b:
                     # Replace target bigram.
-                    subwords[i] = a + b
+                    subwords[i] = subword_a + subword_b
                     del subwords[i + 1]
                 i += 1
 
@@ -250,34 +250,34 @@ class Vocabulary:
             bigram: The Bigram to be replaced.
 
         Returns:
-            A dictionary of update dictionaries for each Bigram with a change in frequency.
+            A dictionary of token update dictionaries for each Bigram with a change in frequency.
         """
 
         # For every Word which contains the target subword pair in its current subword mapping,
         # replace the subword pair by concatenating its elements into one subword. Keep track
         # of which other subword pairs are lost and gained in each Words's subword mapping and
         # produce a dictionary of update dictionaries for each of those Bigrams.
-        a, b = bigram.subword_pair
+        subword_a, subword_b = bigram.subword_pair
         tokens = bigram.token_frequency.keys()
-        updates = defaultdict(lambda: defaultdict(int))
+        bigram_updates = defaultdict(lambda: defaultdict(int))
         for token in tokens:
             frequency = self.tokens[token].frequency
             subwords = self.tokens[token].subwords
             i = 0
             while i < len(subwords) - 1:
-                if subwords[i] == a and subwords[i + 1] == b:
+                if subwords[i] == subword_a and subwords[i + 1] == subword_b:
                     # Replace target bigram.
-                    subwords[i] = a + b
+                    subwords[i] = subword_a + subword_b
                     del subwords[i + 1]
                     # Update other bigram frequencies.
                     if i > 0:
-                        updates[(subwords[i - 1], a)][token] -= frequency
-                        updates[(subwords[i - 1], subwords[i])][token] += frequency
+                        bigram_updates[(subwords[i - 1], subword_a)][token] -= frequency
+                        bigram_updates[(subwords[i - 1], subwords[i])][token] += frequency
                     if i < len(subwords) - 1:
-                        updates[(b, subwords[i + 1])][token] -= frequency
-                        updates[(subwords[i], subwords[i + 1])][token] += frequency
+                        bigram_updates[(subword_b, subwords[i + 1])][token] -= frequency
+                        bigram_updates[(subwords[i], subwords[i + 1])][token] += frequency
                 i += 1
-        return updates
+        return bigram_updates
 
     def map_to_subwords(self, token: str) -> str:
         """Maps a token string to a subwords string.
@@ -405,7 +405,8 @@ class Statistics:
         """Updates the frequency statistics for each subword pair in the given update dictionary.
 
         Args:
-            bigram_updates: A dictionary of update dictionaries for each Bigram with a change in frequency.
+            bigram_updates: A dictionary of token update dictionaries for each Bigram with a
+                change in frequency.
         """
 
         # For each subword pair in the update dictionary, update its corresponding Bigram instance.
