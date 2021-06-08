@@ -1,8 +1,15 @@
+#!/usr/bin/python3
+
 """
-Extracts word tokens and frequencies from text and saves them to an output file with the format:
-<word_token_1> <frequency_1>
-<word_token_2> <frequency_2>
-...
+Extracts word tokens and frequencies from text and saves them to an output file.
+
+Output file format:
+    | <word_token_1> <frequency_1>
+    | <word_token_2> <frequency_2>
+    | ...
+
+Example:
+    compile_vocabulary.py --text sample_text.txt --output vocabulary.txt
 """
 
 import argparse
@@ -12,11 +19,11 @@ from bpe import Vocabulary
 
 class Arguments:
     def __init__(self, args):
-        self.text_fname = args.text
-        self.vocabulary_fname = args.output
+        self.text_path = args.text
+        self.vocabulary_path = args.output
 
     def valid(self):
-        return self.text_fname is not None and self.vocabulary_fname is not None
+        return self.text_path is not None and self.vocabulary_path is not None
 
     @staticmethod
     def get_parser():
@@ -31,23 +38,21 @@ class Arguments:
 
     def invalid_opts(self):
         message = ""
-        if self.text_fname is None:
+        if self.text_path is None:
             message += "Text file must be specified\n"
-        if self.vocabulary_fname is None:
+        if self.vocabulary_path is None:
             message += "Output file must be specified\n"
         return message
 
 
 def compile_vocabulary(args):
-    text_fname = args.text_fname
-    vocabulary_fname = args.vocabulary_fname
+    text_path = args.text_path
+    vocabulary_path = args.vocabulary_path
 
-    # Compile a vocabulary from a text file.
-    with open(text_fname, 'r') as text_file:
+    with open(text_path, 'r') as text_file:
         vocabulary = Vocabulary.from_text_file(text_file)
 
-    # Write the vocabulary to a file.
-    with open(vocabulary_fname, 'w') as vocabulary_file:
+    with open(vocabulary_path, 'w') as vocabulary_file:
         vocabulary.write(file=vocabulary_file)
 
 
