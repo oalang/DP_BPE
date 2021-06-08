@@ -1,12 +1,37 @@
 """
-Classes and methods for generating a vocabulary, training a BPE model, and applying it to text
+A fast implementation of byte pair encoding (BPE).
+
+https://github.com/oalang/DP_BPE
+
+Implements the algorithm described in:
+    | Rico Sennrich, Barry Haddow, and Alexandra Birch. 2016.
+    | Neural Machine Translation of Rare Words with Subword Units.
+    | Proceedings the Association for Computational Linguistics.
+
+Example:
+    >>> from bpe import *
+    >>> text_file = open('sample_text.txt')
+    >>> vocabulary = Vocabulary.from_text_file(text_file)
+    >>> bpe_model = train_model(vocabulary, 100)
+    >>> subwords = encode_text('Hello, world.', bpe_model)
+    >>> subwords
+    'H E L L O_ W OR L D_'
+    >>> text = decode_subwords(subwords)
+    >>> text
+    'HELLO WORLD'
+
+Example:
+    compile_vocabulary.py --text sample_text.txt --output vocabulary.txt
+    bpe_train_model.py --vocabulary vocabulary.txt --max-subwords 100 --output bpe_model.txt
+    bpe_encode_text.py --bpe-model bpe_model.txt --text sample_text.txt --output subwords.txt
+    bpe_decode_subwords.py --subwords subwords.txt --output text.txt
 """
 
 from __future__ import annotations
 from typing import Dict, Optional, Set, TextIO, Tuple
 from collections import defaultdict
+from re import sub
 from math import ceil
-import re
 
 StringPair = Tuple[str, str]
 
@@ -145,7 +170,7 @@ class Vocabulary:
     text and their frequencies.
 
     Attributes:
-        tokens (Dict[str, Word]): A dictionary of token strings found in the given text
+        words (Dict[str, Word]): A dictionary of token strings found in the given text
             and their corresponding Word instances.
         characters (Set[str]): A set of all the characters found in the given text.
     """
@@ -153,15 +178,15 @@ class Vocabulary:
     def __init__(self) -> None:
         """Initializes an empty Vocabulary instance."""
 
-        self.tokens = {}
+        self.words = {}
         self.characters = set()
 
     @classmethod
     def from_text_file(cls, file: TextIO) -> Vocabulary:
         """Initializes a Vocabulary from a text file.
 
-        Normalizes the text by removing punctuation and capitalizing everything. Generates
-        a new Word instance for each unique token string and counts its occurrences.
+        Generates a new Word instance for each unique token string and counts its
+        occurrences.
 
         Args:
             file: A file stream containing the text being processed.
@@ -172,12 +197,7 @@ class Vocabulary:
 
         new_vocabulary = cls()
         for line in file:
-            line = line.upper()
-            line = re.sub(r"[^A-Z']", " ", line)
-            for token in line.split():
-                if new_vocabulary.missing(token):
-                    new_vocabulary.add_word(token)
-                new_vocabulary.tokens[token].update_frequency(1)
+            new_vocabulary.add_text(line)
         return new_vocabulary
 
     @classmethod
@@ -200,8 +220,30 @@ class Vocabulary:
             token, frequency = line.split()
             frequency = int(frequency)
             new_vocabulary.add_word(token)
-            new_vocabulary.tokens[token].update_frequency(frequency)
+            new_vocabulary.words[token].update_frequency(frequency)
         return new_vocabulary
+
+    def add_text(self, text: str) -> None:
+        """Adds the contents of a text string to the Word frequencies.
+
+        Normalizes the text by capitalizing everything and removing punctuation.
+
+        Args:
+            text: The text string to be added.
+        """
+
+        text = text.upper()
+        text = sub(r"[^A-Z']", " ", text)
+        for token in text.split():
+            if self.missing(token):
+                self.add_word(token)
+            self.words[token].update_frequency(1)
+
+    def reset_subwords(self) -> None:
+        """Resets every Word's subword mapping to individual characters."""
+
+        for word in self.words.values():
+            word.subwords = list(word.token) + ['_']
 
     def missing(self, token: str) -> bool:
         """Checks if a token string is missing from the token dictionary.
@@ -213,7 +255,7 @@ class Vocabulary:
             True if the token string is missing from the token dictionary and False otherwise.
         """
 
-        if token in self.tokens:
+        if token in self.words:
             return False
         else:
             return True
@@ -229,7 +271,7 @@ class Vocabulary:
         """
 
         new_word = Word(token)
-        self.tokens[token] = new_word
+        self.words[token] = new_word
         self.characters.update(new_word.subwords)
         if bpe_model:
             new_word.apply_model(bpe_model)
@@ -261,8 +303,8 @@ class Vocabulary:
         tokens = bigram.token_frequency.keys()
         bigram_updates = defaultdict(lambda: defaultdict(int))
         for token in tokens:
-            frequency = self.tokens[token].frequency
-            subwords = self.tokens[token].subwords
+            frequency = self.words[token].frequency
+            subwords = self.words[token].subwords
             i = 0
             while i < len(subwords) - 1:
                 if subwords[i] == subword_a and subwords[i + 1] == subword_b:
@@ -289,7 +331,7 @@ class Vocabulary:
             The subword string matching the token string.
         """
 
-        subwords = self.tokens[token].subwords
+        subwords = self.words[token].subwords
         return ' '.join(subwords)
 
     def write(self, file: TextIO) -> None:
@@ -303,7 +345,7 @@ class Vocabulary:
             file: The file stream to be written to.
         """
 
-        for word in sorted(self.tokens.values(), key=lambda x: (-x.frequency, x.token)):
+        for word in sorted(self.words.values(), key=lambda x: (-x.frequency, x.token)):
             file.write(f"{word.token} {word.frequency}\n")
 
 
@@ -349,7 +391,7 @@ class Statistics:
         # the counts by the Word's frequency. Before building the initial search set, use the
         # most common Bigram's frequency to compute the search set's minimum frequency threshold.
         new_statistics = cls()
-        for word in vocabulary.tokens.values():
+        for word in vocabulary.words.values():
             token = word.token
             subwords = word.subwords
             frequency = word.frequency
@@ -545,3 +587,82 @@ class BPEModel:
 
         for operation in self.operations:
             file.write(f"{operation[0]} {operation[1]}\n")
+
+
+def train_model(vocabulary: Vocabulary, max_subwords: int = 1000) -> BPEModel:
+    """Trains a BPEModel on a Vocabulary.
+
+    The Vocabulary object's subword mappings will be altered to match the model, so make a
+    copy to input if you want the original to remain unchanged.
+
+    Args:
+        vocabulary: The Vocabulary to be trained on.
+        max_subwords: The maximum number of unique subwords that may appear in an encoding
+            using this BPEModel. Default = 1000.
+
+    Returns:
+        A BPEModel.
+    """
+
+    # Train the BPEModel by iteratively adding the most frequent Bigram to the model, replacing
+    # that Bigram in the Vocabulary's subword mappings with its concatenation, removing it from
+    # the Statistics, and then updating the frequencies of every other Bigram affected by the
+    # operation.
+    vocabulary.reset_subwords()
+    statistics = Statistics.from_vocabulary(vocabulary)
+    bpe_model = BPEModel()
+    max_operations = max_subwords - vocabulary.num_characters()
+    for i in range(max_operations):
+        max_bigram = statistics.max_bigram()
+        if max_bigram is None:
+            print(f"Stopped early with {i} operations")
+            break
+        bpe_model.add_operation(max_bigram)
+        bigram_updates = vocabulary.replace_bigram(max_bigram)
+        statistics.remove_bigram(max_bigram)
+        statistics.update_bigram_frequencies(bigram_updates)
+    return bpe_model
+
+
+def encode_text(text: str, bpe_model: BPEModel, vocabulary: Optional[Vocabulary] = None) -> str:
+    """Encodes a given text string into subwords using a given BPEModel.
+
+    Normalizes the text by capitalizing everything and removing punctuation.
+
+    If providing a Vocabulary, its subwords mappings should have been generated using the
+    given BPEModel. New Word instances may be added to the Vocabulary, so make a copy to
+    input if you want the original to remain unchanged.
+
+    Args:
+        text: The text string to be encoded into subwords.
+        bpe_model: The BPEModel used for the encoding.
+        vocabulary: Optional; A Vocabulary containing Word instances with subword mappings
+            already generated by the BPEModel.
+
+    Returns:
+        The encoded text string.
+    """
+
+    if vocabulary is None:
+        vocabulary = Vocabulary()
+    encodings = []
+    text = text.upper()
+    text = sub(r"[^A-Z']", " ", text)
+    for token in text.split():
+        if vocabulary.missing(token):
+            vocabulary.add_word(token, bpe_model)
+        encodings.append(vocabulary.map_to_subwords(token))
+    return ' '.join(encodings)
+
+
+def decode_subwords(subwords: str) -> str:
+    """Decodes a given subword string into regular text.
+
+    Args:
+        subwords: The subword string to be decoded into regular text.
+
+    Returns:
+        The decoded text string.
+    """
+
+    return subwords.replace(" ", "").replace("_", " ").strip()
