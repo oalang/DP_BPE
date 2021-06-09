@@ -3,12 +3,14 @@
 """
 Trains a BPE model from a given vocabulary and saves it to an output file.
 
-Output file format:
-    | <subword_A> <subword_B>
-    | <subword_D> <subword_C>
-    | ...
+Output file format::
 
-Example:
+    <subword_A> <subword_B>
+    <subword_C> <subword_D>
+    ...
+
+Example::
+
     bpe_train_model.py --vocabulary vocabulary.txt --max-subwords 100 --output bpe_model.txt
 """
 
@@ -28,7 +30,7 @@ class Arguments:
 
     @staticmethod
     def get_parser():
-        parser = argparse.ArgumentParser(description=__doc__)
+        parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawTextHelpFormatter)
         parser.add_argument("--vocabulary",
                             help="file path for vocabulary to be trained on",
                             type=str)

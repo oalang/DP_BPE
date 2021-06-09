@@ -3,12 +3,14 @@
 """
 Extracts word tokens and frequencies from text and saves them to an output file.
 
-Output file format:
-    | <word_token_1> <frequency_1>
-    | <word_token_2> <frequency_2>
-    | ...
+Output file format::
 
-Example:
+    <word_token_1> <frequency_1>
+    <word_token_2> <frequency_2>
+    ...
+
+Example::
+
     compile_vocabulary.py --text sample_text.txt --output vocabulary.txt
 """
 
@@ -27,7 +29,7 @@ class Arguments:
 
     @staticmethod
     def get_parser():
-        parser = argparse.ArgumentParser(description=__doc__)
+        parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawTextHelpFormatter)
         parser.add_argument("--text",
                             help="file path for text being processed",
                             type=str)

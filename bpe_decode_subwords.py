@@ -3,7 +3,8 @@
 """
 Groups subwords into words and writes the result to an output file.
 
-Example:
+Example::
+
     bpe_decode_subwords.py --subwords subwords.txt --output text.txt
 """
 
@@ -22,7 +23,7 @@ class Arguments:
 
     @staticmethod
     def get_parser():
-        parser = argparse.ArgumentParser(description=__doc__)
+        parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawTextHelpFormatter)
         parser.add_argument("--subwords",
                             help="file path for subword text being processed",
                             type=str)

@@ -3,7 +3,8 @@
 """
 Uses a BPE model to breakup a text file into subwords and writes the result to an output file.
 
-Example:
+Example::
+
     bpe_encode_text.py --bpe-model bpe_model.txt --text sample_text.txt --output subwords.txt
 """
 
@@ -23,7 +24,7 @@ class Arguments:
 
     @staticmethod
     def get_parser():
-        parser = argparse.ArgumentParser(description=__doc__)
+        parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawTextHelpFormatter)
         parser.add_argument("--bpe-model",
                             help="file path for BPE model",
                             type=str)

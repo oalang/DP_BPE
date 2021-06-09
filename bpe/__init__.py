@@ -8,23 +8,26 @@ Implements the algorithm described in:
     | Neural Machine Translation of Rare Words with Subword Units.
     | Proceedings the Association for Computational Linguistics.
 
-Example:
-    >>> from bpe import *
-    >>> text_file = open('sample_text.txt')
-    >>> vocabulary = Vocabulary.from_text_file(text_file)
-    >>> bpe_model = train_model(vocabulary, 100)
-    >>> subwords = encode_text('Hello, world.', bpe_model)
-    >>> subwords
-    'H E L L O_ W OR L D_'
-    >>> text = decode_subwords(subwords)
-    >>> text
-    'HELLO WORLD'
+Examples:
+    The code is run in a Python console as follows::
 
-Example:
-    compile_vocabulary.py --text sample_text.txt --output vocabulary.txt
-    bpe_train_model.py --vocabulary vocabulary.txt --max-subwords 100 --output bpe_model.txt
-    bpe_encode_text.py --bpe-model bpe_model.txt --text sample_text.txt --output subwords.txt
-    bpe_decode_subwords.py --subwords subwords.txt --output text.txt
+        >>> from bpe import *
+        >>> text_file = open('sample_text.txt')
+        >>> vocabulary = Vocabulary.from_text_file(text_file)
+        >>> bpe_model = train_model(vocabulary, 100)
+        >>> subwords = encode_text('Hello, world.', bpe_model)
+        >>> subwords
+        'H E L L O_ W OR L D_'
+        >>> text = decode_subwords(subwords)
+        >>> text
+        'HELLO WORLD'
+
+    The code is run in a terminal as follows::
+
+        compile_vocabulary.py --text sample_text.txt --output vocabulary.txt
+        bpe_train_model.py --vocabulary vocabulary.txt --max-subwords 100 --output bpe_model.txt
+        bpe_encode_text.py --bpe-model bpe_model.txt --text sample_text.txt --output subwords.txt
+        bpe_decode_subwords.py --subwords subwords.txt --output text.txt
 """
 
 from __future__ import annotations
