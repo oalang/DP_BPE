@@ -3,9 +3,10 @@ A fast implementation of byte pair encoding (BPE)
 
 Implements the algorithm described in:
 
-Rico Sennrich, Barry Haddow, and Alexandra Birch. 2016.
+[Rico Sennrich, Barry Haddow, and Alexandra Birch. 2016.
 Neural Machine Translation of Rare Words with Subword Units.
 Proceedings the Association for Computational Linguistics.
+](https://www.aclweb.org/anthology/P16-1162.pdf)
 
 ## USAGE INSTRUCTIONS
 
@@ -25,7 +26,7 @@ or in a terminal using the executable scripts.
         >>> text
         'HELLO WORLD'
 
-### Running The Scripts in a Terminal
+### Running the Scripts in a Terminal
 
 To compile a vocabulary from a text file:
 
