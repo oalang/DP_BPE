@@ -1,0 +1,732 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Welcome to DP_BPE’s documentation! &#8212; DP_BPE 0.0.1 documentation</title>
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="#">DP_BPE 0.0.1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Welcome to DP_BPE’s documentation!</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="welcome-to-dp-bpe-s-documentation">
+<h1>Welcome to DP_BPE’s documentation!<a class="headerlink" href="#welcome-to-dp-bpe-s-documentation" title="Permalink to this headline">¶</a></h1>
+<div class="toctree-wrapper compound">
+</div>
+<span class="target" id="module-bpe"></span><p>A fast implementation of byte pair encoding (BPE).</p>
+<p><a class="reference external" href="https://github.com/oalang/DP_BPE">https://github.com/oalang/DP_BPE</a></p>
+<dl>
+<dt>Implements the algorithm described in:</dt><dd><div class="line-block">
+<div class="line">Rico Sennrich, Barry Haddow, and Alexandra Birch. 2016.</div>
+<div class="line">Neural Machine Translation of Rare Words with Subword Units.</div>
+<div class="line">Proceedings the Association for Computational Linguistics.</div>
+</div>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<p>The code is run in a Python console as follows:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">bpe</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">text_file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;sample_text.txt&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">vocabulary</span> <span class="o">=</span> <span class="n">Vocabulary</span><span class="o">.</span><span class="n">from_text_file</span><span class="p">(</span><span class="n">text_file</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">bpe_model</span> <span class="o">=</span> <span class="n">train_model</span><span class="p">(</span><span class="n">vocabulary</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">subwords</span> <span class="o">=</span> <span class="n">encode_text</span><span class="p">(</span><span class="s1">&#39;Hello, world.&#39;</span><span class="p">,</span> <span class="n">bpe_model</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">subwords</span>
+<span class="go">&#39;H E L L O_ W OR L D_&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">text</span> <span class="o">=</span> <span class="n">decode_subwords</span><span class="p">(</span><span class="n">subwords</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">text</span>
+<span class="go">&#39;HELLO WORLD&#39;</span>
+</pre></div>
+</div>
+<p>The code is run in a terminal as follows:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">compile_vocabulary</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">text</span> <span class="n">sample_text</span><span class="o">.</span><span class="n">txt</span> <span class="o">--</span><span class="n">output</span> <span class="n">vocabulary</span><span class="o">.</span><span class="n">txt</span>
+<span class="n">bpe_train_model</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">vocabulary</span> <span class="n">vocabulary</span><span class="o">.</span><span class="n">txt</span> <span class="o">--</span><span class="nb">max</span><span class="o">-</span><span class="n">subwords</span> <span class="mi">100</span> <span class="o">--</span><span class="n">output</span> <span class="n">bpe_model</span><span class="o">.</span><span class="n">txt</span>
+<span class="n">bpe_encode_text</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">bpe</span><span class="o">-</span><span class="n">model</span> <span class="n">bpe_model</span><span class="o">.</span><span class="n">txt</span> <span class="o">--</span><span class="n">text</span> <span class="n">sample_text</span><span class="o">.</span><span class="n">txt</span> <span class="o">--</span><span class="n">output</span> <span class="n">subwords</span><span class="o">.</span><span class="n">txt</span>
+<span class="n">bpe_decode_subwords</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">subwords</span> <span class="n">subwords</span><span class="o">.</span><span class="n">txt</span> <span class="o">--</span><span class="n">output</span> <span class="n">text</span><span class="o">.</span><span class="n">txt</span>
+</pre></div>
+</div>
+<dl class="py class">
+<dt id="bpe.BPEModel">
+<em class="property">class </em><code class="sig-prename descclassname">bpe.</code><code class="sig-name descname">BPEModel</code><a class="headerlink" href="#bpe.BPEModel" title="Permalink to this definition">¶</a></dt>
+<dd><p>A Bight Pair Encoding model.</p>
+<p>The model consists of an ordered list of subword concatenation operations. Each operation
+is represented by a tuple of the two subword strings to be concatenated.</p>
+<dl class="py attribute">
+<dt id="bpe.BPEModel.operations">
+<code class="sig-name descname">operations</code><a class="headerlink" href="#bpe.BPEModel.operations" title="Permalink to this definition">¶</a></dt>
+<dd><p>An ordered list of subword concatenation operations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>List[StringPair]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="bpe.BPEModel.add_operation">
+<code class="sig-name descname">add_operation</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">bigram</span><span class="p">:</span> <span class="n"><a class="reference internal" href="#bpe.Bigram" title="bpe.Bigram">bpe.Bigram</a></span></em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#bpe.BPEModel.add_operation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds an operation to the BPEModel.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>bigram</strong> – The Bigram to be added as a subword concatenation operation.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="bpe.BPEModel.from_model_file">
+<em class="property">classmethod </em><code class="sig-name descname">from_model_file</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">file</span><span class="p">:</span> <span class="n">TextIO</span></em><span class="sig-paren">)</span> &#x2192; <a class="reference internal" href="#bpe.BPEModel" title="bpe.BPEModel">bpe.BPEModel</a><a class="headerlink" href="#bpe.BPEModel.from_model_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initializes a BPEModel from a model file.</p>
+<p>Reads in a model file containing an ordered list of unique subword concatenation
+operations. Each line contains an operation represented by the two subword strings
+to be concatenated, for example <code class="docutils literal notranslate"><span class="pre">TH</span> <span class="pre">E_</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>file</strong> – A file stream containing the model being used.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A BPEModel instance.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="bpe.BPEModel.write">
+<code class="sig-name descname">write</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">file</span><span class="p">:</span> <span class="n">TextIO</span></em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#bpe.BPEModel.write" title="Permalink to this definition">¶</a></dt>
+<dd><p>Writes the BPEModel to a file.</p>
+<p>Writes a model file with an ordered list of unique subword concatenation
+operations. Each line contains an operation represented by the two subword
+strings to be concatenated, for example <code class="docutils literal notranslate"><span class="pre">TH</span> <span class="pre">E_</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>file</strong> – The file stream to be written to.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="bpe.Bigram">
+<em class="property">class </em><code class="sig-prename descclassname">bpe.</code><code class="sig-name descname">Bigram</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">subword_pair</span><span class="p">:</span> <span class="n">Tuple<span class="p">[</span>str<span class="p">, </span>str<span class="p">]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bpe.Bigram" title="Permalink to this definition">¶</a></dt>
+<dd><p>Represents a bigram in a Statistics.</p>
+<p>Keeping track of which tokens contain a bigram results in a significant time
+reduction when removing a bigram from the vocabulary, compared to processing
+every token in the vocabulary.</p>
+<dl class="py attribute">
+<dt id="bpe.Bigram.subword_pair">
+<code class="sig-name descname">subword_pair</code><a class="headerlink" href="#bpe.Bigram.subword_pair" title="Permalink to this definition">¶</a></dt>
+<dd><p>A pair of subword strings representing the Bigram.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>StringPair</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="bpe.Bigram.frequency">
+<code class="sig-name descname">frequency</code><a class="headerlink" href="#bpe.Bigram.frequency" title="Permalink to this definition">¶</a></dt>
+<dd><p>The Bigram’s frequency in the text used to generate the Vocabulary.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="bpe.Bigram.token_frequency">
+<code class="sig-name descname">token_frequency</code><a class="headerlink" href="#bpe.Bigram.token_frequency" title="Permalink to this definition">¶</a></dt>
+<dd><p>A dictionary of tokens which currently contain the
+Bigram in their subword mappings.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>Dict[str, int]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="bpe.Bigram.in_search_set">
+<code class="sig-name descname">in_search_set</code><a class="headerlink" href="#bpe.Bigram.in_search_set" title="Permalink to this definition">¶</a></dt>
+<dd><p>A boolean indicating whether or not the Bigram is in the
+current search set for most frequent Bigram.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="bpe.Bigram.add_to_search_set">
+<code class="sig-name descname">add_to_search_set</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">search_set</span><span class="p">:</span> <span class="n">Set<span class="p">[</span><a class="reference internal" href="#bpe.Bigram" title="bpe.Bigram">bpe.Bigram</a><span class="p">]</span></span></em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#bpe.Bigram.add_to_search_set" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds the Bigram to the search set.</p>
+<p>Adds the Bigram to the search set and sets its in_search_set flag to True.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>search_set</strong> – The search set.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="bpe.Bigram.remove_from_search_set">
+<code class="sig-name descname">remove_from_search_set</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">search_set</span><span class="p">:</span> <span class="n">Set<span class="p">[</span><a class="reference internal" href="#bpe.Bigram" title="bpe.Bigram">bpe.Bigram</a><span class="p">]</span></span></em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#bpe.Bigram.remove_from_search_set" title="Permalink to this definition">¶</a></dt>
+<dd><p>Removes the Bigram from the search set.</p>
+<p>Removes the Bigram from the search set and sets its in_search_set flag to False.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>search_set</strong> – The search set.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="bpe.Bigram.update_token_frequencies">
+<code class="sig-name descname">update_token_frequencies</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">token_updates</span><span class="p">:</span> <span class="n">Dict<span class="p">[</span>str<span class="p">, </span>int<span class="p">]</span></span></em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#bpe.Bigram.update_token_frequencies" title="Permalink to this definition">¶</a></dt>
+<dd><p>Updates the Bigram’s frequency statistics.</p>
+<p>Updates the frequency of the Bigram for every Word where it has changed, and
+also its overall frequency.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>token_updates</strong> – A dictionary whose keys are tokens whose Word contains the</p></li>
+<li><p><strong>pair in their subword mapping and whose values are the updates.</strong> (<em>subword</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="bpe.Statistics">
+<em class="property">class </em><code class="sig-prename descclassname">bpe.</code><code class="sig-name descname">Statistics</code><a class="headerlink" href="#bpe.Statistics" title="Permalink to this definition">¶</a></dt>
+<dd><p>A data structure used to keep track of Bigram frequencies in a Vocabulary.</p>
+<p>Statistics keeps track of the changes in Bigram frequency as a Vocabulary is
+altered by subword concatenation operations and provides a fast method for
+finding the most frequent bigram.</p>
+<dl class="py attribute">
+<dt id="bpe.Statistics.bigrams">
+<code class="sig-name descname">bigrams</code><a class="headerlink" href="#bpe.Statistics.bigrams" title="Permalink to this definition">¶</a></dt>
+<dd><p>A dictionary of subword pairs currently
+found in the Vocabulary and their corresponding Bigram instances.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>Dict[StringPair, <a class="reference internal" href="#bpe.Bigram" title="bpe.Bigram">Bigram</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="bpe.Statistics.max_frequency">
+<code class="sig-name descname">max_frequency</code><a class="headerlink" href="#bpe.Statistics.max_frequency" title="Permalink to this definition">¶</a></dt>
+<dd><p>The frequency of the most common Bigram.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="bpe.Statistics.search_set">
+<code class="sig-name descname">search_set</code><a class="headerlink" href="#bpe.Statistics.search_set" title="Permalink to this definition">¶</a></dt>
+<dd><p>A subset of bigrams guaranteed to contain the most
+frequent Bigram.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>Set[<a class="reference internal" href="#bpe.Bigram" title="bpe.Bigram">Bigram</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="bpe.Statistics.threshold">
+<code class="sig-name descname">threshold</code><a class="headerlink" href="#bpe.Statistics.threshold" title="Permalink to this definition">¶</a></dt>
+<dd><p>The minimum frequency threshold for inclusion in search_set.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="bpe.Statistics.adaptation_parameter">
+<code class="sig-name descname">adaptation_parameter</code><a class="headerlink" href="#bpe.Statistics.adaptation_parameter" title="Permalink to this definition">¶</a></dt>
+<dd><p>A parameter used to compute the next threshold
+which is adaptively tuned to make the the next search_set closer to the
+target size.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="bpe.Statistics.add_bigram">
+<code class="sig-name descname">add_bigram</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">subword_pair</span><span class="p">:</span> <span class="n">Tuple<span class="p">[</span>str<span class="p">, </span>str<span class="p">]</span></span></em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#bpe.Statistics.add_bigram" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds a Bigram to the bigram dictionary.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>subword_pair</strong> – A subword pair representing the Bigram to be added.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="bpe.Statistics.build_search_set">
+<code class="sig-name descname">build_search_set</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#bpe.Statistics.build_search_set" title="Permalink to this definition">¶</a></dt>
+<dd><p>Builds a new search set.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="bpe.Statistics.from_vocabulary">
+<em class="property">classmethod </em><code class="sig-name descname">from_vocabulary</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">vocabulary</span><span class="p">:</span> <span class="n"><a class="reference internal" href="#bpe.Vocabulary" title="bpe.Vocabulary">bpe.Vocabulary</a></span></em><span class="sig-paren">)</span> &#x2192; <a class="reference internal" href="#bpe.Statistics" title="bpe.Statistics">bpe.Statistics</a><a class="headerlink" href="#bpe.Statistics.from_vocabulary" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initializes a Statistics instance with a given Vocabulary.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>vocabulary</strong> – Vocabulary to be processed.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A Statistics instance.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="bpe.Statistics.max_bigram">
+<code class="sig-name descname">max_bigram</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <a class="reference internal" href="#bpe.Bigram" title="bpe.Bigram">bpe.Bigram</a><a class="headerlink" href="#bpe.Statistics.max_bigram" title="Permalink to this definition">¶</a></dt>
+<dd><p>Finds the most frequent Bigram.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The most frequent Bigram.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="bpe.Statistics.missing">
+<code class="sig-name descname">missing</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">subword_pair</span><span class="p">:</span> <span class="n">Tuple<span class="p">[</span>str<span class="p">, </span>str<span class="p">]</span></span></em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#bpe.Statistics.missing" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks if a subword pair is missing from the bigram dictionary.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>subword_pair</strong> – The subword pair to be searched for.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>True if the subword pair is missing from the bigram dictionary and False otherwise.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="bpe.Statistics.remove_bigram">
+<code class="sig-name descname">remove_bigram</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">bigram</span><span class="p">:</span> <span class="n"><a class="reference internal" href="#bpe.Bigram" title="bpe.Bigram">bpe.Bigram</a></span></em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#bpe.Statistics.remove_bigram" title="Permalink to this definition">¶</a></dt>
+<dd><p>Removes a Bigram from the bigram dictionary and the search set.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>bigram</strong> – The Bigram to be removed.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="bpe.Statistics.set_threshold">
+<code class="sig-name descname">set_threshold</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">max_frequency</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>int<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#bpe.Statistics.set_threshold" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets a new frequency threshold for the search set.</p>
+<p>If a maximum bigram frequency is provided, use it in place of the previous threshold.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>max_frequency</strong> – Optional; The maximum bigram frequency.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="bpe.Statistics.update_bigram_frequencies">
+<code class="sig-name descname">update_bigram_frequencies</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">bigram_updates</span><span class="p">:</span> <span class="n">dict</span></em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#bpe.Statistics.update_bigram_frequencies" title="Permalink to this definition">¶</a></dt>
+<dd><p>Updates the frequency statistics for each subword pair in the given update dictionary.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>bigram_updates</strong> – A dictionary of token update dictionaries for each Bigram with a
+change in frequency.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="bpe.Vocabulary">
+<em class="property">class </em><code class="sig-prename descclassname">bpe.</code><code class="sig-name descname">Vocabulary</code><a class="headerlink" href="#bpe.Vocabulary" title="Permalink to this definition">¶</a></dt>
+<dd><p>A data structure used to keep track of the unique token strings found in a given
+text and their frequencies.</p>
+<dl class="py attribute">
+<dt id="bpe.Vocabulary.words">
+<code class="sig-name descname">words</code><a class="headerlink" href="#bpe.Vocabulary.words" title="Permalink to this definition">¶</a></dt>
+<dd><p>A dictionary of token strings found in the given text
+and their corresponding Word instances.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>Dict[str, <a class="reference internal" href="#bpe.Word" title="bpe.Word">Word</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="bpe.Vocabulary.characters">
+<code class="sig-name descname">characters</code><a class="headerlink" href="#bpe.Vocabulary.characters" title="Permalink to this definition">¶</a></dt>
+<dd><p>A set of all the characters found in the given text.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>Set[str]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="bpe.Vocabulary.add_text">
+<code class="sig-name descname">add_text</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">text</span><span class="p">:</span> <span class="n">str</span></em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#bpe.Vocabulary.add_text" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds the contents of a text string to the Word frequencies.</p>
+<p>Normalizes the text by capitalizing everything and removing punctuation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>text</strong> – The text string to be added.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="bpe.Vocabulary.add_word">
+<code class="sig-name descname">add_word</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">token</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">bpe_model</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference internal" href="#bpe.BPEModel" title="bpe.BPEModel">bpe.BPEModel</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#bpe.Vocabulary.add_word" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds a Word to the token dictionary.</p>
+<p>If a BPEModel is provided, it is applied to the Word to produce a subword mapping.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>token</strong> – A token string representing the Word to be added.</p></li>
+<li><p><strong>bpe_model</strong> – Optional; A BPEModel used produce a subword mapping.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="bpe.Vocabulary.from_text_file">
+<em class="property">classmethod </em><code class="sig-name descname">from_text_file</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">file</span><span class="p">:</span> <span class="n">TextIO</span></em><span class="sig-paren">)</span> &#x2192; <a class="reference internal" href="#bpe.Vocabulary" title="bpe.Vocabulary">bpe.Vocabulary</a><a class="headerlink" href="#bpe.Vocabulary.from_text_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initializes a Vocabulary from a text file.</p>
+<p>Generates a new Word instance for each unique token string and counts its
+occurrences.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>file</strong> – A file stream containing the text being processed.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A Vocabulary instance.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="bpe.Vocabulary.from_vocabulary_file">
+<em class="property">classmethod </em><code class="sig-name descname">from_vocabulary_file</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">file</span><span class="p">:</span> <span class="n">TextIO</span></em><span class="sig-paren">)</span> &#x2192; <a class="reference internal" href="#bpe.Vocabulary" title="bpe.Vocabulary">bpe.Vocabulary</a><a class="headerlink" href="#bpe.Vocabulary.from_vocabulary_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initializes a Vocabulary from a vocabulary file.</p>
+<p>Reads in a vocabulary file with each line containing a unique token string followed
+by its frequency in the training set. For example, <code class="docutils literal notranslate"><span class="pre">THE</span> <span class="pre">4827</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>file</strong> – A file stream containing the vocabulary being processed.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A Vocabulary instance.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="bpe.Vocabulary.map_to_subwords">
+<code class="sig-name descname">map_to_subwords</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">token</span><span class="p">:</span> <span class="n">str</span></em><span class="sig-paren">)</span> &#x2192; str<a class="headerlink" href="#bpe.Vocabulary.map_to_subwords" title="Permalink to this definition">¶</a></dt>
+<dd><p>Maps a token string to a subwords string.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>token</strong> – The token string to be mapped.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The subword string matching the token string.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="bpe.Vocabulary.missing">
+<code class="sig-name descname">missing</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">token</span><span class="p">:</span> <span class="n">str</span></em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#bpe.Vocabulary.missing" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks if a token string is missing from the token dictionary.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>token</strong> – The token string to be searched for.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>True if the token string is missing from the token dictionary and False otherwise.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="bpe.Vocabulary.num_characters">
+<code class="sig-name descname">num_characters</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; int<a class="headerlink" href="#bpe.Vocabulary.num_characters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the size of the Vocabulary’s character set.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The size of the Vocabulary’s character set.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="bpe.Vocabulary.replace_bigram">
+<code class="sig-name descname">replace_bigram</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">bigram</span><span class="p">:</span> <span class="n"><a class="reference internal" href="#bpe.Bigram" title="bpe.Bigram">bpe.Bigram</a></span></em><span class="sig-paren">)</span> &#x2192; Dict<span class="p">[</span>Tuple<span class="p">[</span>str<span class="p">, </span>str<span class="p">]</span><span class="p">, </span>Dict<span class="p">[</span>str<span class="p">, </span>int<span class="p">]</span><span class="p">]</span><a class="headerlink" href="#bpe.Vocabulary.replace_bigram" title="Permalink to this definition">¶</a></dt>
+<dd><p>Replaces every instance of a given Bigram in the Vocabulary.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>bigram</strong> – The Bigram to be replaced.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A dictionary of token update dictionaries for each Bigram with a change in frequency.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="bpe.Vocabulary.reset_subwords">
+<code class="sig-name descname">reset_subwords</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#bpe.Vocabulary.reset_subwords" title="Permalink to this definition">¶</a></dt>
+<dd><p>Resets every Word’s subword mapping to individual characters.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="bpe.Vocabulary.write">
+<code class="sig-name descname">write</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">file</span><span class="p">:</span> <span class="n">TextIO</span></em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#bpe.Vocabulary.write" title="Permalink to this definition">¶</a></dt>
+<dd><p>Writes the Vocabulary to a file.</p>
+<p>Writes a vocabulary file with each line containing a unique token string followed
+by its frequency in the training set. For example, <code class="docutils literal notranslate"><span class="pre">THE</span> <span class="pre">4827</span></code>. The Vocabulary is
+sorted by frequency, from greatest to least, and then alphabetical order.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>file</strong> – The file stream to be written to.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="bpe.Word">
+<em class="property">class </em><code class="sig-prename descclassname">bpe.</code><code class="sig-name descname">Word</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">token</span><span class="p">:</span> <span class="n">str</span></em><span class="sig-paren">)</span><a class="headerlink" href="#bpe.Word" title="Permalink to this definition">¶</a></dt>
+<dd><p>Represents a word in a Vocabulary.</p>
+<dl class="py attribute">
+<dt id="bpe.Word.token">
+<code class="sig-name descname">token</code><a class="headerlink" href="#bpe.Word.token" title="Permalink to this definition">¶</a></dt>
+<dd><p>A unique token string used to identify this Word.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="bpe.Word.frequency">
+<code class="sig-name descname">frequency</code><a class="headerlink" href="#bpe.Word.frequency" title="Permalink to this definition">¶</a></dt>
+<dd><p>The Word’s frequency in the text used to generate the Vocabulary.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="bpe.Word.subwords">
+<code class="sig-name descname">subwords</code><a class="headerlink" href="#bpe.Word.subwords" title="Permalink to this definition">¶</a></dt>
+<dd><p>The Word’s current subword mapping.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="bpe.Word.apply_model">
+<code class="sig-name descname">apply_model</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">bpe_model</span><span class="p">:</span> <span class="n"><a class="reference internal" href="#bpe.BPEModel" title="bpe.BPEModel">bpe.BPEModel</a></span></em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#bpe.Word.apply_model" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies a BPEModel to the Word to arrange its characters into subwords.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>bpe_model</strong> – The BPEModel to be used.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="bpe.Word.update_frequency">
+<code class="sig-name descname">update_frequency</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">n</span><span class="p">:</span> <span class="n">int</span></em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#bpe.Word.update_frequency" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds n to the Word’s frequency.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>n</strong> – The number to add to the Word’s frequency.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt id="bpe.decode_subwords">
+<code class="sig-prename descclassname">bpe.</code><code class="sig-name descname">decode_subwords</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">subwords</span><span class="p">:</span> <span class="n">str</span></em><span class="sig-paren">)</span> &#x2192; str<a class="headerlink" href="#bpe.decode_subwords" title="Permalink to this definition">¶</a></dt>
+<dd><p>Decodes a given subword string into regular text.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>subwords</strong> – The subword string to be decoded into regular text.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The decoded text string.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="bpe.encode_text">
+<code class="sig-prename descclassname">bpe.</code><code class="sig-name descname">encode_text</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">text</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">bpe_model</span><span class="p">:</span> <span class="n"><a class="reference internal" href="#bpe.BPEModel" title="bpe.BPEModel">bpe.BPEModel</a></span></em>, <em class="sig-param"><span class="n">vocabulary</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference internal" href="#bpe.Vocabulary" title="bpe.Vocabulary">bpe.Vocabulary</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span> &#x2192; str<a class="headerlink" href="#bpe.encode_text" title="Permalink to this definition">¶</a></dt>
+<dd><p>Encodes a given text string into subwords using a given BPEModel.</p>
+<p>Normalizes the text by capitalizing everything and removing punctuation.</p>
+<p>If providing a Vocabulary, its subwords mappings should have been generated using the
+given BPEModel. New Word instances may be added to the Vocabulary, so make a copy to
+input if you want the original to remain unchanged.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>text</strong> – The text string to be encoded into subwords.</p></li>
+<li><p><strong>bpe_model</strong> – The BPEModel used for the encoding.</p></li>
+<li><p><strong>vocabulary</strong> – Optional; A Vocabulary containing Word instances with subword mappings
+already generated by the BPEModel.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The encoded text string.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="bpe.train_model">
+<code class="sig-prename descclassname">bpe.</code><code class="sig-name descname">train_model</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">vocabulary</span><span class="p">:</span> <span class="n"><a class="reference internal" href="#bpe.Vocabulary" title="bpe.Vocabulary">bpe.Vocabulary</a></span></em>, <em class="sig-param"><span class="n">max_subwords</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">1000</span></em><span class="sig-paren">)</span> &#x2192; <a class="reference internal" href="#bpe.BPEModel" title="bpe.BPEModel">bpe.BPEModel</a><a class="headerlink" href="#bpe.train_model" title="Permalink to this definition">¶</a></dt>
+<dd><p>Trains a BPEModel on a Vocabulary.</p>
+<p>The Vocabulary object’s subword mappings will be altered to match the model, so make a
+copy to input if you want the original to remain unchanged.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>vocabulary</strong> – The Vocabulary to be trained on.</p></li>
+<li><p><strong>max_subwords</strong> – The maximum number of unique subwords that may appear in an encoding
+using this BPEModel. Default = 1000.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A BPEModel.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
+<li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
+<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
+</ul>
+</div>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="#">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Welcome to DP_BPE’s documentation!</a></li>
+<li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
+</ul>
+
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/index.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="#">DP_BPE 0.0.1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Welcome to DP_BPE’s documentation!</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2021, Omer Lang.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.2.1.
+    </div>
+  </body>
+</html>

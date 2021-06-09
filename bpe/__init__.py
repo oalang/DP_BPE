@@ -208,7 +208,7 @@ class Vocabulary:
         """Initializes a Vocabulary from a vocabulary file.
 
         Reads in a vocabulary file with each line containing a unique token string followed
-        by its frequency in the training set. For example, "THE 4827".
+        by its frequency in the training set. For example, ``THE 4827``.
 
         Args:
             file: A file stream containing the vocabulary being processed.
@@ -341,7 +341,7 @@ class Vocabulary:
         """Writes the Vocabulary to a file.
 
         Writes a vocabulary file with each line containing a unique token string followed
-        by its frequency in the training set. For example, "THE 4827". The Vocabulary is
+        by its frequency in the training set. For example, ``THE 4827``. The Vocabulary is
         sorted by frequency, from greatest to least, and then alphabetical order.
 
         Args:
@@ -551,7 +551,7 @@ class BPEModel:
 
         Reads in a model file containing an ordered list of unique subword concatenation
         operations. Each line contains an operation represented by the two subword strings
-        to be concatenated, for example "TH E_".
+        to be concatenated, for example ``TH E_``.
 
         Args:
             file: A file stream containing the model being used.
@@ -582,7 +582,7 @@ class BPEModel:
 
         Writes a model file with an ordered list of unique subword concatenation
         operations. Each line contains an operation represented by the two subword
-        strings to be concatenated, for example "TH E_".
+        strings to be concatenated, for example ``TH E_``.
 
         Args:
             file: The file stream to be written to.
