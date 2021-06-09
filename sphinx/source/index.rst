@@ -10,8 +10,8 @@ DP_BPE documentation
    :maxdepth: 2
    :caption: Contents:
 
-Code
-====
+Classes and methods
+===================
 
 .. automodule:: bpe
    :members:
