@@ -38,7 +38,7 @@ class Arguments:
                             help="file path for BPE model output",
                             type=str)
         parser.add_argument("--max-subwords",
-                            help="maximum size of subword vocabulary",
+                            help="optional; maximum size of subword vocabulary; default=1000",
                             type=int,
                             default=1000)
         return parser

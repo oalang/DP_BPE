@@ -1,14 +1,37 @@
 # DP_BPE
 A fast implementation of byte pair encoding (BPE)
 
-USAGE INSTRUCTIONS
-------------------
+Implements the algorithm described in:
+
+Rico Sennrich, Barry Haddow, and Alexandra Birch. 2016.
+Neural Machine Translation of Rare Words with Subword Units.
+Proceedings the Association for Computational Linguistics.
+
+## USAGE INSTRUCTIONS
+
+The code can be run in a Python console using the methods provided by the `bpe` package
+or in a terminal using the executable scripts.
+
+### Python Console Example
+
+        >>> from bpe import *
+        >>> text_file = open('sample_text.txt')
+        >>> vocabulary = Vocabulary.from_text_file(text_file)
+        >>> bpe_model = train_model(vocabulary, 100)
+        >>> subwords = encode_text('Hello, world.', bpe_model)
+        >>> subwords
+        'H E L L O_ W OR L D_'
+        >>> text = decode_subwords(subwords)
+        >>> text
+        'HELLO WORLD'
+
+### Running The Scripts in a Terminal
 
 To compile a vocabulary from a text file:
 
-    python compile_vocab.py --text <text_file> --output <vocab_file>
+    compile_vocabulary.py --text <text_file> --output <vocabulary_file>
 
-The vocabulary file will look like this:
+The vocabulary file will look something like this:
 
     THE 60133
     AND 33258
@@ -19,9 +42,9 @@ The vocabulary file will look like this:
 
 To train a bpe model:
 
-    python train_model.py --vocab <vocab_file> --max-subwords <number> --output <model_file>
+    bpe_train_model.py --vocabulary <vocabulary_file> --max-subwords <number> --output <bpe_model_file>
 
-The model file will look like this:
+The model file will look something like this:
 
     E _
     T H
@@ -32,9 +55,9 @@ The model file will look like this:
 
 To encode a text file:
 
-    python encode_text.py --model <model_file> --text <text_file> --output <subwrd_file>
+    python bpe_encode_text.py --bpe-model <bpe_model_file> --text <text_file> --output <subword_file>
 
-The encoded file will look like this:
+The encoded file will look something like this:
 
     CH A P T ER_ ON E_ MISSUS_ RACHEL_ LY ND E_ I S_ SU R P R IS ED_
     THAT_ HAD_ I T S_ S OU R C E_ A WA Y_ B A C K_ IN_ THE_ W O O D S_
@@ -44,4 +67,4 @@ The encoded file will look like this:
 
 To decode a subwords file:
 
-    python decode_subwords.py --subwords <subwrd_file> --output <text_file>
+    python bpe_decode_subwords.py --subwords <subword_file> --output <text_file>
