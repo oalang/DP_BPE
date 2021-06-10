@@ -8,6 +8,10 @@ Neural Machine Translation of Rare Words with Subword Units.
 Proceedings the Association for Computational Linguistics.
 ](https://www.aclweb.org/anthology/P16-1162.pdf)
 
+Documentation:
+
+https://oalang.github.io/DP_BPE/
+
 ## USAGE INSTRUCTIONS
 
 The code can be run in a Python console using the methods provided by the `bpe` package
