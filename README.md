@@ -10,7 +10,7 @@ Proceedings the Association for Computational Linguistics.
 
 Documentation:
 
-https://oalang.github.io/DP_BPE/
+https://oalang.github.io/DP_BPE
 
 ## USAGE INSTRUCTIONS
 
