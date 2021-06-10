@@ -60,7 +60,7 @@ The model file will look something like this:
 
 To encode a text file:
 
-    python bpe_encode_text.py --bpe-model <bpe_model_file> --text <text_file> --output <subword_file>
+    bpe_encode_text.py --bpe-model <bpe_model_file> --text <text_file> --output <subword_file>
 
 The encoded file will look something like this:
 
@@ -72,4 +72,4 @@ The encoded file will look something like this:
 
 To decode a subwords file:
 
-    python bpe_decode_subwords.py --subwords <subword_file> --output <text_file>
+    bpe_decode_subwords.py --subwords <subword_file> --output <text_file>
