@@ -1,4 +1,5 @@
 # DP_BPE
+
 A fast implementation of byte pair encoding (BPE)
 
 Implements the algorithm described in:
@@ -19,16 +20,16 @@ or in a terminal using the executable scripts.
 
 ### Python Console Example
 
-        >>> from bpe import *
-        >>> text_file = open('sample_text.txt')
-        >>> vocabulary = Vocabulary.from_text_file(text_file)
-        >>> bpe_model = train_model(vocabulary, 100)
-        >>> subwords = encode_text('Hello, world.', bpe_model)
-        >>> subwords
-        'H E L L O_ W OR L D_'
-        >>> text = decode_subwords(subwords)
-        >>> text
-        'HELLO WORLD'
+    >>> from bpe import *
+    >>> text_file = open('sample_text.txt')
+    >>> vocabulary = Vocabulary.from_text_file(text_file)
+    >>> bpe_model = train_model(vocabulary, 100)
+    >>> subwords = encode_text('Hello, world.', bpe_model)
+    >>> subwords
+    'H E L L O_ W OR L D_'
+    >>> text = decode_subwords(subwords)
+    >>> text
+    'HELLO WORLD'
 
 ### Running the Scripts in a Terminal
 
