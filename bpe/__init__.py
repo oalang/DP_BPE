@@ -531,7 +531,7 @@ class Statistics:
 
 
 class BPEModel:
-    """A Bight Pair Encoding model.
+    """A Byte Pair Encoding model.
 
     The model consists of an ordered list of subword concatenation operations. Each operation
     is represented by a tuple of the two subword strings to be concatenated.
